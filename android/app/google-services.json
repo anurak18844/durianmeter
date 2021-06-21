@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "363556091470",
+    "project_id": "durionmeter",
+    "storage_bucket": "durionmeter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:363556091470:android:516b76ca6f7a9e9b26751f",
+        "android_client_info": {
+          "package_name": "th.durio.anurak.durianmeter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "363556091470-cgit3bs680mib4bfp4j1lsp6m4l41ich.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "th.durio.anurak.durianmeter",
+            "certificate_hash": "f75676e95cf0fc97d777e269a1f8621b7d4b3d60"
+          }
+        },
+        {
+          "client_id": "363556091470-vvamcovh3qht7afunp4419kgg8bjnior.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCp3pyLl7Oi7eRKxq_YNY9sRWD_M0KWDNk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "363556091470-vvamcovh3qht7afunp4419kgg8bjnior.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
