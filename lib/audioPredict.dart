@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io' as io;
 import 'package:audioplayers/audioplayers.dart';
+import 'package:durianmeter/Models/PredictResponse.dart';
+import 'package:durianmeter/Network/restApi.dart';
 import 'package:durianmeter/send_request.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -224,7 +226,10 @@ class RecorderExampleState extends State<RecorderExample> {
     });
     onPlayAudio();
     PredictRequest p = PredictRequest(userId: "1",knockSound: file, locationLat: "7444444",locationLong: "8787878");
-    CallPredictRequest().sendRequest(p);
+    CallApi().getPrediction(p).then((resp) {
+      print("Here I am!!!!!!!");
+      print(resp!.maturityScore.toString());
+    });
     print("After stopped");
     print(_currentStatus);
   }
