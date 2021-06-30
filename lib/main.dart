@@ -1,4 +1,4 @@
-import 'package:durianmeter/loginScreen.dart';
+import 'package:durianmeter/Screens/loginScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

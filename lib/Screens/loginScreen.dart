@@ -1,16 +1,18 @@
-import 'package:durianmeter/homeScreen.dart';
-import 'package:durianmeter/registerScreen.dart';
+import 'package:durianmeter/Screens/homeScreen.dart';
+import 'package:durianmeter/Screens/registerScreen.dart';
+import 'package:durianmeter/Utils/globalVariables.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'Network/restApi.dart';
-import 'Models/authUser.dart';
+import '../Network/restApi.dart';
+import '../Models/authUser.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'auth_service.dart';
+import 'audioPredict.dart';
+import '../Network/auth_service.dart';
 
 GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['profile', 'email']);
 
@@ -28,6 +30,8 @@ class _LoginScreenState extends State<LoginScreen> {
   var remember = false;
   AuthUser user = AuthUser();
   bool isCallInProgress = false;
+  final TextEditingController _user = TextEditingController();
+  final TextEditingController _token = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -173,12 +177,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                             this.isCallInProgress = true;
                                           });
                                           CallApi().loginCustomer(user.username, user.password).then(
-                                              (response){
+                                              (response) async {
                                                 setState(() {
                                                   this.isCallInProgress = false;
                                                 });
                                                 print(response?.token);
                                                 if(response!.token != ''){
+                                                  Fluttertoast.showToast(
+                                                    msg: 'LOGIN SUCCESS!!!!',
+                                                    gravity: ToastGravity.CENTER,
+                                                  );
+                                                  userToken = response.token;
                                                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
                                                 }
                                               }

@@ -1,7 +1,7 @@
 import 'package:durianmeter/Utils/constant.dart';
 import 'package:file/file.dart';
 import 'package:http/http.dart' as http;
-import 'Models/predictRequest.dart';
+import '../Models/predictRequest.dart';
 
 class CallPredictRequest {
   String _url = baseApiUrl+ 'api/durian/';

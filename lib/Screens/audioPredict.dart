@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io' as io;
 import 'package:audioplayers/audioplayers.dart';
-import 'package:durianmeter/send_request.dart';
+import 'package:durianmeter/Models/PredictResponse.dart';
+import 'package:durianmeter/Network/restApi.dart';
+import 'package:durianmeter/Screens/send_request.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter/material.dart';
@@ -9,24 +11,47 @@ import 'package:flutter/services.dart';
 import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'Models/predictRequest.dart';
+import '../Models/predictRequest.dart';
 
 
-void main(){
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIOverlays([]);
-  runApp(TestScreen());
-}
-
-class TestScreen extends StatefulWidget {
+class AudioPredict extends StatefulWidget {
   final LocalFileSystem localFileSystem;
-  TestScreen({localFileSystem}) : this.localFileSystem = localFileSystem ?? LocalFileSystem();
+  AudioPredict({localFileSystem}) : this.localFileSystem = localFileSystem ?? LocalFileSystem();
 
   @override
-  _TestScreenState createState() => _TestScreenState();
+  _AudioPredictState createState() => _AudioPredictState();
 }
 
-class _TestScreenState extends State<TestScreen> {
+class _AudioPredictState extends State<AudioPredict> {
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Pridict'),backgroundColor: Color(0xFF4CAF50),
+      leading: IconButton(
+        icon:Icon(Icons.arrow_back_ios,
+      ),
+        onPressed: (){
+            Navigator.pop(context);
+        },)
+       ),
+      body: SafeArea(
+        child: new RecorderExample(),
+      ),
+    );
+  }
+}
+
+class RecorderExample extends StatefulWidget {
+  final LocalFileSystem localFileSystem;
+
+  RecorderExample({localFileSystem}) : this.localFileSystem = localFileSystem ?? LocalFileSystem();
+
+  @override
+  State<StatefulWidget> createState() => new RecorderExampleState();
+}
+
+class RecorderExampleState extends State<RecorderExample> {
   FlutterAudioRecorder2? _recorder;
   Recording? _current;
   RecordingStatus _currentStatus = RecordingStatus.Unset;
@@ -42,81 +67,73 @@ class _TestScreenState extends State<TestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Column(
-            children: [
+    return new Center(
+      child: new Padding(
+        padding: new EdgeInsets.all(8.0),
+        child: new Column(
+            children: <Widget>[
               Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                child: ElevatedButton(
-                  child: _buildText(_currentStatus),
-                  onPressed: (){
-                    print("Status after pressed");
-                    print(_currentStatus);
-                    //Check mode
-                    switch (_currentStatus) {
-                      case RecordingStatus.Initialized:
-                        {
-                          _start();
-                          break;
-                        }
-                      case RecordingStatus.Recording:
-                        {
-                          _stop();
-                          _init();
-                          break;
-                        }
-                      // case RecordingStatus.Stopped:
-                      //   {
-                      //
-                      //
-                      //     break;
-                      //   }
-                      default:
-                        break;
-                    }
-                  },
-                ),
+                  height: 500.0,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20.0),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.grey.shade400,
+                            blurRadius: 30.0,
+                            offset: Offset(5, 5)
+                        )
+                      ]
+                  ),
               ),
-              // Container(
-              //   width: double.infinity,
-              //   padding: EdgeInsets.symmetric(horizontal: 15),
-              //   child: ElevatedButton(
-              //     child: _buildText(_currentStatus),
-              //     onPressed: (){
-              //       print("Status after pressed");
-              //       print(_currentStatus);
-              //       //Check mode
-              //       switch (_currentStatus) {
-              //         case RecordingStatus.Initialized:
-              //           {
-              //             _start();
-              //             break;
-              //           }
-              //         case RecordingStatus.Recording:
-              //           {
-              //             _stop();
-              //             break;
-              //           }
-              //         case RecordingStatus.Stopped:
-              //           {
-              //             _init();
-              //             break;
-              //           }
-              //         default:
-              //           break;
-              //       }
-              //     },
-              //   ),
-              // ),
-            ],
-          ),
-        ),
+              SizedBox(
+                height: 15.0,
+              ),
+              Container(
+                    height: 70.0,
+                    width: double.infinity,
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: TextButton(
+                      onPressed: () {
+                        print("Status after pressed");
+                        print(_currentStatus);
+                        //Check mode
+                        switch (_currentStatus) {
+                          case RecordingStatus.Initialized:
+                            {
+                              _start();
+                              break;
+                            }
+                          case RecordingStatus.Recording:
+                            {
+                              _stop();
+                              _init();
+                              break;
+                            }
+                        // case RecordingStatus.Stopped:
+                        //   {
+                        //
+                        //
+                        //     break;
+                        //   }
+                          default:
+                            break;
+                        }
+                      },
+                      child: _buildText(_currentStatus),
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                            Colors.green,
+                          )),
+                    ),
+                  ),
+
+            ]),
       ),
     );
   }
+
   _init() async {
     try {
       bool hasPermission = await FlutterAudioRecorder2.hasPermissions ?? false;
@@ -150,7 +167,6 @@ class _TestScreenState extends State<TestScreen> {
         setState(() {
           _current = current;
           _currentStatus = current!.status!;
-          print("Status");
           print(_currentStatus);
         });
       } else {
@@ -208,40 +224,46 @@ class _TestScreenState extends State<TestScreen> {
       _current = result;
       _currentStatus = _current!.status!;
     });
-    //onPlayAudio();
+    onPlayAudio();
     PredictRequest p = PredictRequest(userId: "1",knockSound: file, locationLat: "7444444",locationLong: "8787878");
-    CallPredictRequest().sendRequest(p);
+    CallApi().getPrediction(p).then((resp) {
+      print("Here I am!!!!!!!");
+      print(resp!.maturityScore.toString());
+    });
     print("After stopped");
     print(_currentStatus);
   }
 
-
-
-
   Widget _buildText(RecordingStatus status) {
     var text = "";
     switch (_currentStatus) {
-      case RecordingStatus.Unset:{
-        text = "Preparing...";
-        break;
-      }
       case RecordingStatus.Initialized:
-      case RecordingStatus.Stopped:
         {
-          text = 'Start';
+          text = 'START';
           break;
         }
       case RecordingStatus.Recording:
         {
-          text = 'Stop';
+          text = 'PAUSE';
           break;
         }
+      case RecordingStatus.Paused:
+        {
+          text = 'RESUM';
+          break;
+        }
+      case RecordingStatus.Stopped:
+        {
+          text = 'START';
+          break;
+        }
+      default:
+        break;
     }
-    return Text(text, style: TextStyle(color: Colors.white,fontSize: 20.0));
+    return Text(text, style: TextStyle(color: Colors.white,fontSize: 40.0));
   }
 
   void onPlayAudio() async {
-    print("Playing....");
     AudioPlayer audioPlayer = AudioPlayer();
     await audioPlayer.play(_current!.path!, isLocal: true);
   }

@@ -1,9 +1,11 @@
-import 'package:durianmeter/homeMenuScreen.dart';
-import 'package:durianmeter/loginScreen.dart';
-import 'package:durianmeter/meScreen.dart';
+import 'package:durianmeter/Screens/homeMenuScreen.dart';
+import 'package:durianmeter/Screens/loginScreen.dart';
+import 'package:durianmeter/Screens/meScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'datasetScreen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,7 +17,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final tabs =[
     Center(child: HomeMenuPage(),),
-    Center(child: Text('Search'),),
+    Center(child: DatasetScreen(),),
     Center(child: Text('Notification'),),
     Center(child: MeScreenPage(),),
   ];
