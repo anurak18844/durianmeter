@@ -10,31 +10,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../Models/predictRequest.dart';
 
-
 class AudioPredict extends StatefulWidget {
   final LocalFileSystem localFileSystem;
-  AudioPredict({localFileSystem}) : this.localFileSystem = localFileSystem ?? LocalFileSystem();
+  AudioPredict({localFileSystem})
+      : this.localFileSystem = localFileSystem ?? LocalFileSystem();
 
   @override
   _AudioPredictState createState() => _AudioPredictState();
 }
 
 class _AudioPredictState extends State<AudioPredict> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Pridict'),backgroundColor: Color(0xFF4CAF50),
-      leading: IconButton(
-        icon:Icon(Icons.arrow_back_ios,
-      ),
-        onPressed: (){
-            Navigator.pop(context);
-        },)
-       ),
+      appBar: AppBar(
+          title: Text('Predict'),
+          backgroundColor: Color(0xFF4CAF50),
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          )),
       body: SafeArea(
         child: new RecorderExample(),
       ),
@@ -45,7 +48,8 @@ class _AudioPredictState extends State<AudioPredict> {
 class RecorderExample extends StatefulWidget {
   final LocalFileSystem localFileSystem;
 
-  RecorderExample({localFileSystem}) : this.localFileSystem = localFileSystem ?? LocalFileSystem();
+  RecorderExample({localFileSystem})
+      : this.localFileSystem = localFileSystem ?? LocalFileSystem();
 
   @override
   State<StatefulWidget> createState() => new RecorderExampleState();
@@ -57,6 +61,7 @@ class RecorderExampleState extends State<RecorderExample> {
   RecordingStatus _currentStatus = RecordingStatus.Unset;
   Recording? current;
   var _chkRecord = false;
+  var predictData = '0%';
 
   @override
   void initState() {
@@ -70,66 +75,67 @@ class RecorderExampleState extends State<RecorderExample> {
     return new Center(
       child: new Padding(
         padding: new EdgeInsets.all(8.0),
-        child: new Column(
-            children: <Widget>[
-              Container(
-                  height: 500.0,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20.0),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.grey.shade400,
-                            blurRadius: 30.0,
-                            offset: Offset(5, 5)
-                        )
-                      ]
-                  ),
-              ),
-              SizedBox(
-                height: 15.0,
-              ),
-              Container(
-                    height: 70.0,
-                    width: double.infinity,
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: TextButton(
-                      onPressed: () {
-                        print("Status after pressed");
-                        print(_currentStatus);
-                        //Check mode
-                        switch (_currentStatus) {
-                          case RecordingStatus.Initialized:
-                            {
-                              _start();
-                              break;
-                            }
-                          case RecordingStatus.Recording:
-                            {
-                              _stop();
-                              _init();
-                              break;
-                            }
-                        // case RecordingStatus.Stopped:
-                        //   {
-                        //
-                        //
-                        //     break;
-                        //   }
-                          default:
-                            break;
-                        }
-                      },
-                      child: _buildText(_currentStatus),
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                            Colors.green,
-                          )),
-                    ),
-                  ),
-
-            ]),
+        child: new Column(children: <Widget>[
+          Container(
+            alignment: Alignment.center,
+            child: Text(
+              predictData,
+              style: TextStyle(fontSize: 150.0),
+            ),
+            height: 500.0,
+            width: double.infinity,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.0),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.grey.shade400,
+                      blurRadius: 30.0,
+                      offset: Offset(5, 5))
+                ]),
+          ),
+          SizedBox(
+            height: 15.0,
+          ),
+          Container(
+            height: 70.0,
+            width: double.infinity,
+            padding: const EdgeInsets.only(top: 8.0),
+            child: TextButton(
+              onPressed: () {
+                print("Status after pressed");
+                print(_currentStatus);
+                //Check mode
+                switch (_currentStatus) {
+                  case RecordingStatus.Initialized:
+                    {
+                      _start();
+                      break;
+                    }
+                  case RecordingStatus.Recording:
+                    {
+                      _stop();
+                      _init();
+                      break;
+                    }
+                  // case RecordingStatus.Stopped:
+                  //   {
+                  //
+                  //
+                  //     break;
+                  //   }
+                  default:
+                    break;
+                }
+              },
+              child: _buildText(_currentStatus),
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                Colors.green,
+              )),
+            ),
+          ),
+        ]),
       ),
     );
   }
@@ -193,7 +199,7 @@ class RecorderExampleState extends State<RecorderExample> {
         }
 
         var current = await _recorder!.current(channel: 0);
-        // print(current.status);
+        print(current!.status);
         setState(() {
           _current = current;
           _currentStatus = _current!.status!;
@@ -225,10 +231,31 @@ class RecorderExampleState extends State<RecorderExample> {
       _currentStatus = _current!.status!;
     });
     onPlayAudio();
-    PredictRequest p = PredictRequest(userId: "1",knockSound: file, locationLat: "7444444",locationLong: "8787878");
+    PredictRequest p = PredictRequest(
+        userId: "1",
+        knockSound: file,
+        locationLat: "7444444",
+        locationLong: "8787878");
     CallApi().getPrediction(p).then((resp) {
       print("Here I am!!!!!!!");
       print(resp!.maturityScore.toString());
+      if (resp.maturityScore == null) {
+        setState(() {
+          predictData = 'Null.';
+          Fluttertoast.showToast(
+            msg: predictData,
+            gravity: ToastGravity.CENTER,
+          );
+        });
+      } else {
+        setState(() {
+          predictData = resp.maturityScore.toString() + '%';
+          Fluttertoast.showToast(
+            msg: predictData,
+            gravity: ToastGravity.CENTER,
+          );
+        });
+      }
     });
     print("After stopped");
     print(_currentStatus);
@@ -260,7 +287,7 @@ class RecorderExampleState extends State<RecorderExample> {
       default:
         break;
     }
-    return Text(text, style: TextStyle(color: Colors.white,fontSize: 40.0));
+    return Text(text, style: TextStyle(color: Colors.white, fontSize: 40.0));
   }
 
   void onPlayAudio() async {
