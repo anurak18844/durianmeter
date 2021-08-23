@@ -117,7 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   obscureText: true,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(),
-                                    labelText: 'Enter your confirm password',
+                                    labelText: 'Enter your confirm passwo rd',
                                     hintText: 'Enter Your confirm password',
                                     icon: Icon(
                                       Icons.lock_outline,

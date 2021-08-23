@@ -1,6 +1,8 @@
-import 'package:durianmeter/Screens/loginScreen.dart';
+import 'package:durianmeter/Screens/audioPredictOnly.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'Screens/audioPredict.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,9 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Durain Meter',
-      theme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green)),
-      home: LoginScreen(),
+      home: AudioPredict(),
     );
   }
 }

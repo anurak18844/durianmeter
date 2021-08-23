@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:form_field_validator/form_field_validator.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../Models/predictRequest.dart';
@@ -52,7 +53,6 @@ class RecorderExample extends StatefulWidget {
 
   RecorderExample({localFileSystem})
       : this.localFileSystem = localFileSystem ?? LocalFileSystem();
-
   @override
   State<StatefulWidget> createState() => new RecorderExampleState();
 }
@@ -62,12 +62,14 @@ class RecorderExampleState extends State<RecorderExample> {
   Recording? _current;
   RecordingStatus _currentStatus = RecordingStatus.Unset;
   Recording? current;
+  final _formkey = GlobalKey<FormState>();
   var _chkRecord = false;
   int _maturityScore = 0;
   var _requestFile;
   var _chkRecordAudio = false;
   var _chkSelectScore = false;
-  int count = 0;
+  int _no = 0;
+  String comment = '';
   @override
   void initState() {
     // TODO: implement initState
@@ -88,296 +90,327 @@ class RecorderExampleState extends State<RecorderExample> {
       { "matScore": 95, "color": Color(0xFFFFB300) },
       { "matScore": 100, "color": Color(0xFFFFA000) },
     ];
-    return new Center(
-      child: new Padding(
-        padding: new EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          child: new Column(children: <Widget>[
-            Container(
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  // Container(
-                  //   child: Icon(
-                  //     Icons.file_copy_outlined,
-                  //     color: Colors.green,
-                  //     size: 150.0,
-                  //   ),
-                  // ),
-                  Container(
-                    alignment: Alignment.center,
-                    child: Text('${count}',style: TextStyle(fontSize: 70),),
-                  ),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  Container(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: Icon(_chkRecordAudio ?
-                            Icons.check_box : Icons.check_box_outline_blank  ,
-                            color: Colors.green,
-                            size: 35.0,
-                          ),
-                          onPressed: () {},
+    return Container(
+      width: double.infinity,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Form(
+              key: _formkey,
+              child: Center(
+                child: new Padding(
+                  padding: new EdgeInsets.all(8.0),
+                  child: SingleChildScrollView(
+                    child: new Column(children: <Widget>[
+                      Container(
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 10.0,
+                            ),
+                            Container(
+                              width: 300,
+                              child: TextFormField(
+                                validator: RequiredValidator(
+                                    errorText: 'Input durain number'),
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Input durian number',
+                                  hintText: 'Input durian number',
+                                ),
+                                keyboardType: TextInputType.number,
+                                onSaved: (String? number) {
+                                  _no = int.parse(number!);
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 10,),
+                            Container(
+                              width: 300,
+                              child: TextFormField(
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Input comment',
+                                  hintText: 'Input comment',
+                                ),
+                                onSaved: (String? comments) {
+                                  comment = comments!;
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              height: 15.0,
+                            ),
+                            Container(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(_chkRecordAudio ?
+                                    Icons.check_box : Icons.check_box_outline_blank  ,
+                                      color: Colors.green,
+                                      size: 35.0,
+                                    ),
+                                    onPressed: () {},
+                                  ),
+                                  SizedBox(
+                                    width: 15.0,
+                                  ),
+                                  Text(
+                                    'Record Audio.',
+                                    style: TextStyle(fontSize: 40.0),
+                                  )
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: 15.0,
+                            ),
+                            Container(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(_chkSelectScore ?
+                                    Icons.check_box:  Icons.check_box_outline_blank,
+                                      color: Colors.green,
+                                      size: 35.0,
+                                    ),
+                                    onPressed: () {},
+                                  ),
+                                  SizedBox(
+                                    width: 15.0,
+                                  ),
+                                  Text(
+                                    'Select Score.',
+                                    style: TextStyle(fontSize: 40.0),
+                                  )
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 20.0,),
+                            // ElevatedButton(
+                            //   onPressed: () {
+                            //     setState(() {
+                            //       no = 0;
+                            //     });
+                            //   },
+                            //   child: Text('Recount',style: TextStyle(fontSize: 40.0),),
+                            //   style: ButtonStyle(
+                            //       backgroundColor: MaterialStateProperty.all<Color>(
+                            //         Colors.green,
+                            //       )),
+                            // ),
+                          ],
                         ),
-                        SizedBox(
-                          width: 15.0,
-                        ),
-                        Text(
-                          'Record Audio.',
-                          style: TextStyle(fontSize: 40.0),
-                        )
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  Container(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: Icon(_chkSelectScore ?
-                            Icons.check_box:  Icons.check_box_outline_blank,
-                            color: Colors.green,
-                            size: 35.0,
-                          ),
-                          onPressed: () {},
-                        ),
-                        SizedBox(
-                          width: 15.0,
-                        ),
-                        Text(
-                          'Select Score.',
-                          style: TextStyle(fontSize: 40.0),
-                        )
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20.0,),
-                  ElevatedButton(
-                    onPressed: () {
-                    setState(() {
-                      count = 0;
-                    });
-                    },
-                    child: Text('Recount',style: TextStyle(fontSize: 40.0),),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                          Colors.green,
-                        )),
-                  ),
-                ],
-              ),
-              height: 300.0,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20.0),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey.shade400,
-                        blurRadius: 30.0,
-                        offset: Offset(5, 5))
-                  ]),
-            ),
-            SizedBox(
-              height: 15.0,
-            ),
-            Container(
-              height: 70.0,
-              width: double.infinity,
-              padding: const EdgeInsets.only(top: 8.0),
-              child: TextButton(
-                onPressed: () {
-                  print("Status after pressed");
-                  print(_currentStatus);
-                  //Check mode
-                  switch (_currentStatus) {
-                    case RecordingStatus.Initialized:
-                      {
-                        _start();
-                        break;
-                      }
-                    case RecordingStatus.Recording:
-                      {
-                        _stop();
-                        _init();
-                        setState(() {
-                          _chkRecordAudio = true;
-                        });
-                        break;
-                      }
-                    // case RecordingStatus.Stopped:
-                    //   {
-                    //
-                    //
-                    //     break;
-                    //   }
-                    default:
-                      break;
-                  }
-                },
-                child: _buildText(_currentStatus),
-                style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                  Colors.green,
-                )),
-              ),
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  for(var m in maturityList)
-                    MaturityButton(
-                      maturityScore: m['matScore'],
-                      color: m['color'],
-                      onPress: () {
-                        Fluttertoast.showToast(
-                          msg: 'SELECT ${m['matScore']} SCORE!!!!',
-                          gravity: ToastGravity.CENTER,
-                        );
-                        setState(() {
-                          _maturityScore=m['matScore'];
-                          _chkSelectScore = true;
-                        });
-                      },
-                    ),
-                    // Container(
-                  //   height: 70.0,
-                  //   width: 65.0,
-                  //   padding: const EdgeInsets.only(top: 8.0),
-                  //   child: ElevatedButton(
-                  //     onPressed: (){
-                  //       print("5555555");
-                  //     },
-                  //     child: Text(
-                  //       '70%',
-                  //       style: TextStyle(fontSize: 15.0, color: Colors.black),
-                  //     ),
-                  //     style: ButtonStyle(
-                  //         backgroundColor: MaterialStateProperty.all<Color?>(
-                  //       Colors.yellow[50],
-                  //     )),
-                  //   ),
-                  // ),
-                  // Container(
-                  //   height: 70.0,
-                  //   width: 65.0,
-                  //   padding: const EdgeInsets.only(top: 8.0),
-                  //   child: ElevatedButton(
-                  //     onPressed: (){
-                  //       print("5555555");
-                  //     },
-                  //     child: Text(
-                  //       '75%',
-                  //       style: TextStyle(fontSize: 15.0, color: Colors.black),
-                  //     ),
-                  //     style: ButtonStyle(
-                  //         backgroundColor: MaterialStateProperty.all<Color?>(
-                  //       Colors.yellow[100],
-                  //     )),
-                  //   ),
-                  // ),
-                  // Container(
-                  //   height: 70.0,
-                  //   width: 65.0,
-                  //   padding: const EdgeInsets.only(top: 8.0),
-                  //   child: ElevatedButton(
-                  //     onPressed: (){
-                  //       print("5555555");
-                  //     },
-                  //     child: Text(
-                  //       '80%',
-                  //       style: TextStyle(fontSize: 15.0, color: Colors.black),
-                  //     ),
-                  //     style: ButtonStyle(
-                  //         backgroundColor: MaterialStateProperty.all<Color?>(
-                  //       Colors.yellow[200],
-                  //     )),
-                  //   ),
-                  // ),
-                  // Container(
-                  //   height: 70.0,
-                  //   width: 65.0,
-                  //   padding: const EdgeInsets.only(top: 8.0),
-                  //   child: ElevatedButton(
-                  //     onPressed: (){
-                  //       print("5555555");
-                  //     },
-                  //     child: Text(
-                  //       '85%',
-                  //       style: TextStyle(fontSize: 15.0, color: Colors.black),
-                  //     ),
-                  //     style: ButtonStyle(
-                  //         backgroundColor: MaterialStateProperty.all<Color?>(
-                  //       Colors.yellow[300],
-                  //     )),
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 5.0,
-            ),
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  for(var m in maturityList2)
-                    MaturityButton(
-                      maturityScore: m['matScore'],
-                      color: m['color'],
-                      onPress: () {
-                        Fluttertoast.showToast(
-                          msg: 'SELECT ${m['matScore']} SCORE!!!!',
-                          gravity: ToastGravity.CENTER,
-                        );
-                        setState(() {
-                          _maturityScore=m['matScore'];
-                          _chkSelectScore = true;
-                        });
-                      },
-                    ),
-                  Container(
-                    width: 65.0,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.send,
-                        size: 50.0,
-                        color: Colors.yellow[900],
+                        height: 300.0,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20.0),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.grey.shade400,
+                                  blurRadius: 30.0,
+                                  offset: Offset(5, 5))
+                            ]),
                       ),
-                      onPressed: () {
-                        _sendDatasetRequest();
-                        setState(() {
-                          _chkRecordAudio = false;
-                          _chkSelectScore = false;
-                          count++;
-                          // Fluttertoast.showToast(
-                          //   msg: 'SEND DATA!!',
-                          //   gravity: ToastGravity.CENTER,
-                          // );
-                        });
-                      },
-                    ),
+                      SizedBox(
+                        height: 15.0,
+                      ),
+                      Container(
+                        height: 70.0,
+                        width: double.infinity,
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: TextButton(
+                          onPressed: () {
+                            print("Status after pressed");
+                            print(_currentStatus);
+                            //Check mode
+                            switch (_currentStatus) {
+                              case RecordingStatus.Initialized:
+                                {
+                                  _start();
+                                  break;
+                                }
+                              case RecordingStatus.Recording:
+                                {
+                                  _stop();
+                                  _init();
+                                  setState(() {
+                                    _chkRecordAudio = true;
+                                  });
+                                  break;
+                                }
+                            // case RecordingStatus.Stopped:
+                            //   {
+                            //
+                            //
+                            //     break;
+                            //   }
+                              default:
+                                break;
+                            }
+                          },
+                          child: _buildText(_currentStatus),
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                Colors.green,
+                              )),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 5.0,
+                      ),
+                      Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            for(var m in maturityList)
+                              MaturityButton(
+                                maturityScore: m['matScore'],
+                                color: m['color'],
+                                onPress: () {
+                                  Fluttertoast.showToast(
+                                    msg: 'SELECT ${m['matScore']} SCORE!!!!',
+                                    gravity: ToastGravity.CENTER,
+                                  );
+                                  setState(() {
+                                    _maturityScore=m['matScore'];
+                                    _chkSelectScore = true;
+                                  });
+                                },
+                              ),
+                            // Container(
+                            //   height: 70.0,
+                            //   width: 65.0,
+                            //   padding: const EdgeInsets.only(top: 8.0),
+                            //   child: ElevatedButton(
+                            //     onPressed: (){
+                            //       print("5555555");
+                            //     },
+                            //     child: Text(
+                            //       '70%',
+                            //       style: TextStyle(fontSize: 15.0, color: Colors.black),
+                            //     ),
+                            //     style: ButtonStyle(
+                            //         backgroundColor: MaterialStateProperty.all<Color?>(
+                            //       Colors.yellow[50],
+                            //     )),
+                            //   ),
+                            // ),
+                            // Container(
+                            //   height: 70.0,
+                            //   width: 65.0,
+                            //   padding: const EdgeInsets.only(top: 8.0),
+                            //   child: ElevatedButton(
+                            //     onPressed: (){
+                            //       print("5555555");
+                            //     },
+                            //     child: Text(
+                            //       '75%',
+                            //       style: TextStyle(fontSize: 15.0, color: Colors.black),
+                            //     ),
+                            //     style: ButtonStyle(
+                            //         backgroundColor: MaterialStateProperty.all<Color?>(
+                            //       Colors.yellow[100],
+                            //     )),
+                            //   ),
+                            // ),
+                            // Container(
+                            //   height: 70.0,
+                            //   width: 65.0,
+                            //   padding: const EdgeInsets.only(top: 8.0),
+                            //   child: ElevatedButton(
+                            //     onPressed: (){
+                            //       print("5555555");
+                            //     },
+                            //     child: Text(
+                            //       '80%',
+                            //       style: TextStyle(fontSize: 15.0, color: Colors.black),
+                            //     ),
+                            //     style: ButtonStyle(
+                            //         backgroundColor: MaterialStateProperty.all<Color?>(
+                            //       Colors.yellow[200],
+                            //     )),
+                            //   ),
+                            // ),
+                            // Container(
+                            //   height: 70.0,
+                            //   width: 65.0,
+                            //   padding: const EdgeInsets.only(top: 8.0),
+                            //   child: ElevatedButton(
+                            //     onPressed: (){
+                            //       print("5555555");
+                            //     },
+                            //     child: Text(
+                            //       '85%',
+                            //       style: TextStyle(fontSize: 15.0, color: Colors.black),
+                            //     ),
+                            //     style: ButtonStyle(
+                            //         backgroundColor: MaterialStateProperty.all<Color?>(
+                            //       Colors.yellow[300],
+                            //     )),
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 5.0,
+                      ),
+                      Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            for(var m in maturityList2)
+                              MaturityButton(
+                                maturityScore: m['matScore'],
+                                color: m['color'],
+                                onPress: () {
+                                  Fluttertoast.showToast(
+                                    msg: 'SELECT ${m['matScore']} SCORE!!!!',
+                                    gravity: ToastGravity.CENTER,
+                                  );
+                                  setState(() {
+                                    _maturityScore=m['matScore'];
+                                    _chkSelectScore = true;
+                                  });
+                                },
+                              ),
+                            Container(
+                              width: 65.0,
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.send,
+                                  size: 50.0,
+                                  color: Colors.yellow[900],
+                                ),
+                                onPressed: () {
+                                  _formkey.currentState!.save();
+                                  print(_no);
+                                  print(comment);
+                                  _sendDatasetRequest();
+                                  setState(() {
+                                    _chkRecordAudio = false;
+                                    _chkSelectScore = false;
+
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ]),
                   ),
-                ],
+                ),
               ),
             )
-          ]),
+          ],
         ),
-      ),
+      )
     );
   }
 
@@ -398,7 +431,7 @@ class RecorderExampleState extends State<RecorderExample> {
         // can add extension like ".mp4" ".wav" ".m4a" ".aac"
         customPath = appDocDirectory.path +
             customPath +
-            DateTime.now().millisecondsSinceEpoch.toString()+"_"+(count+1).toString();
+            DateTime.now().millisecondsSinceEpoch.toString()+"_"+(_no+1).toString();
 
         // .wav <---> AudioFormat.WAV
         // .mp4 .m4a .aac <---> AudioFormat.AAC
@@ -518,7 +551,10 @@ class RecorderExampleState extends State<RecorderExample> {
       DatasetRequest dataset = DatasetRequest(
           knockSound: _requestFile,
           maturityScore: _maturityScore,
+          no : _no,
       );
+      print("PRINT DATASET!!!!!!!!!!!!!!!!");
+      print(dataset.no);
       CallApi().getDatasetResponse(dataset).then((resp) {
         Fluttertoast.showToast(
           msg: 'SET MATURITY SCORE : ${resp!.maturityScore.toString()}',
@@ -526,6 +562,7 @@ class RecorderExampleState extends State<RecorderExample> {
         );
         print("Here I am!!!!!!!");
         print(resp!.maturityScore.toString());
+        print(resp!.no.toString());
       });
   }
 }

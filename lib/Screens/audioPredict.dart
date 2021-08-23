@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
+import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:durianmeter/Models/PredictResponse.dart';
 import 'package:durianmeter/Network/restApi.dart';
@@ -27,17 +28,6 @@ class _AudioPredictState extends State<AudioPredict> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: Text('Predict'),
-          backgroundColor: Color(0xFF4CAF50),
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          )),
       body: SafeArea(
         child: new RecorderExample(),
       ),
@@ -55,89 +45,447 @@ class RecorderExample extends StatefulWidget {
   State<StatefulWidget> createState() => new RecorderExampleState();
 }
 
-class RecorderExampleState extends State<RecorderExample> {
+class RecorderExampleState extends State<RecorderExample>
+    with SingleTickerProviderStateMixin {
   FlutterAudioRecorder2? _recorder;
   Recording? _current;
   RecordingStatus _currentStatus = RecordingStatus.Unset;
   Recording? current;
-  var _chkRecord = false;
   var predictData = '0%';
+  var record = true;
+  var statusText = "กำลังรอรับเสียง";
+  var firstPredict = true;
+
+  AnimationController? progressController;
+  Animation<double>? animation;
+  double maturityValue = 0;
+  double valueStart = 100;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _init();
+    progressController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 1000));
+    animation = Tween<double>(begin: 0, end: 0).animate(progressController!)
+      ..addListener(() {
+        setState(() {});
+      });
   }
 
   @override
   Widget build(BuildContext context) {
+    double _width = MediaQuery.of(context).copyWith().size.width;
     return new Center(
-      child: new Padding(
-        padding: new EdgeInsets.all(8.0),
-        child: new Column(children: <Widget>[
-          Container(
-            alignment: Alignment.center,
-            child: Text(
-              predictData,
-              style: TextStyle(fontSize: 150.0),
-            ),
-            height: 500.0,
-            width: double.infinity,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20.0),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.grey.shade400,
-                      blurRadius: 30.0,
-                      offset: Offset(5, 5))
-                ]),
-          ),
-          SizedBox(
-            height: 15.0,
-          ),
-          Container(
-            height: 70.0,
-            width: double.infinity,
-            padding: const EdgeInsets.only(top: 8.0),
-            child: TextButton(
-              onPressed: () {
-                print("Status after pressed");
-                print(_currentStatus);
-                //Check mode
-                switch (_currentStatus) {
-                  case RecordingStatus.Initialized:
-                    {
-                      _start();
-                      break;
+      child: new Container(
+        child: new Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              CustomPaint(
+                foregroundPainter: CircleProgress(animation!.value),
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  child: Center(
+                      child: Text(
+                    "${animation!.value.toInt()}%",
+                    style: TextStyle(color: Colors.teal, fontSize: 24),
+                  )),
+                ),
+              ),
+              SizedBox(
+                height: 40,
+              ),
+              buildDescription(_width, maturityValue, firstPredict),
+              SizedBox(
+                height: 20.0,
+              ),
+              Container(
+                child: Text(
+                  "สถานะ : " + statusText,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(
+                height: 50.0,
+              ),
+              Container(
+                width: 270,
+                height: 75,
+                child: RaisedButton(
+                  onPressed: () {
+                    progressController!.reverse();
+                    setState(() {
+                      record = !record;
+                      statusText = "กำลังบันทึกเสียง ..";
+                    });
+                    switch (_currentStatus) {
+                      case RecordingStatus.Initialized:
+                        {
+                          _start();
+                          break;
+                        }
+                      case RecordingStatus.Recording:
+                        {
+                          _stop();
+                          setState(() {
+                            statusText = "กำลังรอรับเสียง";
+                            firstPredict = false;
+                          });
+                          _init();
+                          break;
+                        }
+                      default:
+                        break;
                     }
-                  case RecordingStatus.Recording:
-                    {
-                      _stop();
-                      _init();
-                      break;
-                    }
-                  // case RecordingStatus.Stopped:
-                  //   {
-                  //
-                  //
-                  //     break;
-                  //   }
-                  default:
-                    break;
-                }
-              },
-              child: _buildText(_currentStatus),
-              style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                Colors.green,
-              )),
-            ),
-          ),
-        ]),
+                  },
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(80.0)),
+                  padding: const EdgeInsets.all(0.0),
+                  child: Ink(
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: <Color>[
+                            Color(0xFF0D47A1),
+                            Color(0xFF66BB6A),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(80.0)),
+                        border: Border.all(color: Colors.teal, width: 1)),
+                    child: Container(
+                      constraints: const BoxConstraints(
+                          minWidth: double.infinity,
+                          minHeight: 60.0), // min sizes for Material buttons
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                              alignment: Alignment.center,
+                              width: 50,
+                              child: Icon(
+                                record
+                                    ? Icons.fiber_manual_record_rounded
+                                    : Icons.stop,
+                                color: Colors.redAccent,
+                                size: 40,
+                              )),
+                          Container(
+                              alignment: Alignment.center,
+                              width: 150,
+                              child: Text(
+                                record ? "RECORD" : "STOP",
+                                style: TextStyle(
+                                    fontSize: 24, color: Colors.white),
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ]),
       ),
     );
+  }
+
+  Widget buildDescription(
+      double _width, double maturityValue, bool firstPrecit) {
+    if (firstPredict) {
+      return Container(
+          child: Column(
+        children: [
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  width: _width * .1,
+                ),
+                Container(
+                  height: 26,
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(30)),
+                  alignment: Alignment.center,
+                  width: _width * .7,
+                ),
+                Container(
+                  width: _width * .1,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  alignment: Alignment.centerRight,
+                  width: _width * .1,
+                  child: Icon(
+                    Icons.arrow_right,
+                    size: 40,
+                    color: Colors.red,
+                  ),
+                ),
+                Container(
+                  height: 35,
+                  decoration: BoxDecoration(
+                      color: Colors.red[400],
+                      borderRadius: BorderRadius.circular(30)),
+                  alignment: Alignment.center,
+                  width: _width * .7,
+                  child: Text("${maturityValue.toInt()}% : Not predict.",
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
+                ),
+                Container(
+                  width: _width * .1,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  width: _width * .1,
+                ),
+                Container(
+                  height: 26,
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(30)),
+                  alignment: Alignment.center,
+                  width: _width * .7,
+                ),
+                Container(
+                  width: _width * .1,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ));
+    } else if (maturityValue <= 0 || maturityValue == 5) {
+      return Container(
+          child: Column(
+        children: [
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  width: _width * .1,
+                ),
+                Container(
+                  height: 26,
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(30)),
+                  alignment: Alignment.center,
+                  width: _width * .7,
+                ),
+                Container(
+                  width: _width * .1,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  width: _width * .1,
+                  child: Icon(
+                    Icons.arrow_right,
+                    size: 40,
+                    color: Colors.red,
+                  ),
+                ),
+                Container(
+                  height: 35,
+                  decoration: BoxDecoration(
+                      color: Colors.red[400],
+                      borderRadius: BorderRadius.circular(30)),
+                  alignment: Alignment.center,
+                  width: _width * .7,
+                  child: Text(
+                      "${maturityValue.toInt()}% : ${_buildDescriptionText(maturityValue)}",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
+                ),
+                Container(
+                  width: _width * .1,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  width: _width * .1,
+                ),
+                Container(
+                  height: 26,
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(30)),
+                  alignment: Alignment.center,
+                  width: _width * .6,
+                ),
+                Container(
+                  width: _width * .1,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ));
+    } else {
+      return Container(
+          child: Column(
+        children: [
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  width: _width * .1,
+                ),
+                Container(
+                  height: 26,
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(30)),
+                  alignment: Alignment.center,
+                  width: _width * .7,
+                  child: Text(
+                      "${maturityValue.toInt() - 5}% : ${_buildDescriptionText(maturityValue - 5)}",
+                      style: TextStyle(fontSize: 16, color: Colors.black54)),
+                ),
+                Container(
+                  width: _width * .1,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  width: _width * .1,
+                  child: Icon(
+                    Icons.arrow_right,
+                    size: 40,
+                    color: Colors.teal,
+                  ),
+                ),
+                Container(
+                  height: 35,
+                  decoration: BoxDecoration(
+                      color: Colors.teal,
+                      borderRadius: BorderRadius.circular(30)),
+                  alignment: Alignment.center,
+                  width: _width * .7,
+                  child: Text(
+                      "${maturityValue.toInt()}% : ${_buildDescriptionText(maturityValue)}",
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
+                ),
+                Container(
+                  width: _width * .1,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  width: _width * .1,
+                ),
+                Container(
+                  height: 26,
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(30)),
+                  alignment: Alignment.center,
+                  width: _width * .7,
+                  child: Text(
+                      "${maturityValue.toInt() + 5}% : ${_buildDescriptionText(maturityValue + 5)}",
+                      style: TextStyle(fontSize: 16, color: Colors.black54)),
+                ),
+                Container(
+                  width: _width * .1,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ));
+    }
+  }
+
+  String _buildDescriptionText(double maturityValue) {
+    String message = '';
+    if (maturityValue <= 0 || maturityValue == 5) {
+      message = "Can't predict try again.";
+    } else {
+      switch (maturityValue.toInt()) {
+        //case 0: {message = "Can't predct try again.";}break;
+        case 70:
+          {
+            message = "สุกแข็ง";
+          }
+          break;
+        case 75:
+          {
+            message = "สุกห่าม";
+          }
+          break;
+        case 80:
+          {
+            message = "สุกกรอบนอกนุ่มใน";
+          }
+          break;
+        case 85:
+          {
+            message = "สุกนิ่ม";
+          }
+          break;
+        case 90:
+          {
+            message = "สุกนิ่มมาก";
+          }
+          break;
+        case 95:
+          {
+            message = "สุกเนื้อเริ่มเหลว";
+          }
+          break;
+        case 100:
+          {
+            message = "สุกเนื้อเหลว";
+          }
+          break;
+        default:
+          {
+            message = "ดิบ";
+          }
+          break;
+      }
+    }
+    return message;
   }
 
   _init() async {
@@ -147,14 +495,13 @@ class RecorderExampleState extends State<RecorderExample> {
       if (hasPermission) {
         String customPath = '/flutter_audio_recorder_';
         io.Directory appDocDirectory;
-//        io.Directory appDocDirectory = await getApplicationDocumentsDirectory();
+
         if (io.Platform.isIOS) {
           appDocDirectory = await getApplicationDocumentsDirectory();
         } else {
           appDocDirectory = (await getExternalStorageDirectory())!;
         }
 
-        // can add extension like ".mp4" ".wav" ".m4a" ".aac"
         customPath = appDocDirectory.path +
             customPath +
             DateTime.now().millisecondsSinceEpoch.toString();
@@ -210,16 +557,6 @@ class RecorderExampleState extends State<RecorderExample> {
     }
   }
 
-  _resume() async {
-    await _recorder!.resume();
-    setState(() {});
-  }
-
-  _pause() async {
-    await _recorder!.pause();
-    setState(() {});
-  }
-
   _stop() async {
     var result = await _recorder!.stop();
     print("Stop recording: ${result!.path}");
@@ -232,16 +569,19 @@ class RecorderExampleState extends State<RecorderExample> {
     });
     onPlayAudio();
     PredictRequest p = PredictRequest(
-        userId: "1",
-        knockSound: file,
-        locationLat: "7444444",
-        locationLong: "8787878");
+      userId: "1",
+      knockSound: file,
+      locationLat: "7444444",
+      locationLong: "8787878",
+    );
+
     CallApi().getPrediction(p).then((resp) {
       print("Here I am!!!!!!!");
       print(resp!.maturityScore.toString());
       if (resp.maturityScore == null) {
         setState(() {
-          predictData = 'Null.';
+          maturityValue = 0;
+          predictData = 'NULL';
           Fluttertoast.showToast(
             msg: predictData,
             gravity: ToastGravity.CENTER,
@@ -249,7 +589,15 @@ class RecorderExampleState extends State<RecorderExample> {
         });
       } else {
         setState(() {
-          predictData = resp.maturityScore.toString() + '%';
+          predictData = resp.maturityScore.toString() + "%";
+          maturityValue = resp.maturityScore!.toDouble();
+          animation = Tween<double>(begin: 0,end: maturityValue).animate(progressController!)..addListener(() {
+            setState(() {
+
+            });
+
+          });
+          progressController!.forward();
           Fluttertoast.showToast(
             msg: predictData,
             gravity: ToastGravity.CENTER,
@@ -261,37 +609,43 @@ class RecorderExampleState extends State<RecorderExample> {
     print(_currentStatus);
   }
 
-  Widget _buildText(RecordingStatus status) {
-    var text = "";
-    switch (_currentStatus) {
-      case RecordingStatus.Initialized:
-        {
-          text = 'START';
-          break;
-        }
-      case RecordingStatus.Recording:
-        {
-          text = 'PAUSE';
-          break;
-        }
-      case RecordingStatus.Paused:
-        {
-          text = 'RESUM';
-          break;
-        }
-      case RecordingStatus.Stopped:
-        {
-          text = 'START';
-          break;
-        }
-      default:
-        break;
-    }
-    return Text(text, style: TextStyle(color: Colors.white, fontSize: 40.0));
-  }
-
   void onPlayAudio() async {
     AudioPlayer audioPlayer = AudioPlayer();
     await audioPlayer.play(_current!.path!, isLocal: true);
+  }
+}
+
+class CircleProgress extends CustomPainter {
+  double currentProgress;
+
+  CircleProgress(this.currentProgress);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint outerCircle = Paint()
+      ..strokeWidth = 10
+      ..color = Colors.teal
+      ..style = PaintingStyle.stroke;
+
+    Paint completeArc = Paint()
+      ..strokeWidth = 10
+      ..color = Colors.redAccent
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    Offset center = Offset(size.width / 2, size.height / 2);
+    double radius = min(size.width / 2, size.height / 2) - 7;
+
+    canvas.drawCircle(center, radius, outerCircle);
+
+    double angle = 2 * pi * (currentProgress / 100);
+
+    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), -pi / 2,
+        angle, false, completeArc);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }
