@@ -1,12 +1,13 @@
 import 'package:durianmeter/Models/DatasetRequest.dart';
 import 'package:durianmeter/Models/DatasetResponse.dart';
 import 'package:durianmeter/Models/PredictResponse.dart';
+import 'package:durianmeter/Models/authResponse.dart';
+import 'package:durianmeter/Models/authUser.dart';
 import 'package:durianmeter/Models/loginModel.dart';
 import 'package:durianmeter/Models/predictRequest.dart';
 import 'package:durianmeter/Utils/constant.dart';
 import 'package:durianmeter/Utils/globalVariables.dart';
 import 'package:http/http.dart' as http;
-
 
 class CallApi {
   String _headerToken = "token " + userToken;
@@ -28,14 +29,13 @@ class CallApi {
       var jsonString = response.body;
       LoginModel loginModel = loginModelFromJson(jsonString);
 
-
       return loginModel;
     }
 
     return null;
   }
 
-  Future<PredictResponse?> getPrediction(PredictRequest predictRequest) async{
+  Future<PredictResponse?> getPrediction(PredictRequest predictRequest) async {
     print("HeaderToken " + _headerToken);
     Uri _uri = Uri.parse(baseApiUrl + "api/durian/");
     print("From sendRequest()");
@@ -54,9 +54,9 @@ class CallApi {
         filename: predictRequest.knockSound.path.split("/").last,
       ),
     );
-    request.fields["user"]="1";
-    request.fields["location_lat"]="3.555877";
-    request.fields["location_long"]="6.475788";
+    request.fields["user"] = "1";
+    request.fields["location_lat"] = "3.555877";
+    request.fields["location_long"] = "6.475788";
     print(request.files[0].filename);
 
     request.fields.forEach((key, value) => print("k: $key, v: $value"));
@@ -66,14 +66,15 @@ class CallApi {
     PredictResponse pResp;
     print("RESPONSE: ${response.statusCode}");
     print(respStr);
-    if(response.statusCode==201){
+    if (response.statusCode == 201) {
       pResp = predictResponseFromJson(respStr);
       return pResp;
     }
     return null;
   }
 
-  Future<DatasetResponse?> getDatasetResponse(DatasetRequest datasetRequest) async{
+  Future<DatasetResponse?> getDatasetResponse(
+      DatasetRequest datasetRequest) async {
     print("HeaderToken " + _headerToken);
     Uri _uri = Uri.parse(baseApiUrl + "dataset/knocksound/");
     var request = http.MultipartRequest('POST', _uri);
@@ -90,7 +91,7 @@ class CallApi {
       ),
     );
 
-    request.fields["maturity_score"]= datasetRequest.maturityScore.toString();
+    request.fields["maturity_score"] = datasetRequest.maturityScore.toString();
     request.fields['no'] = datasetRequest.no.toString();
 
     print(request.files[0].filename);
@@ -102,10 +103,27 @@ class CallApi {
     DatasetResponse dResp;
     print("RESPONSE: ${response.statusCode}");
     print(respStr);
-    if(response.statusCode==201){
+    if (response.statusCode == 201) {
       dResp = datasetResponseFromJson(respStr);
       return dResp;
     }
+    return null;
+  }
+
+  Future<AuthUserResponse?> getAuthUser(String id) async {
+    Uri _uri = Uri.parse(baseApiUrl + "api/user/" + id);
+    var request = http.MultipartRequest('GET', _uri);
+
+    request.headers['Authorization'] = _headerToken;
+    var response = await request.send();
+    AuthUserResponse authRes;
+    var resStr = await response.stream.bytesToString();
+    if (response.statusCode == 200) {
+      authRes = authUseFromJson(resStr);
+      print("Success");
+      return authRes;
+    } else
+      print("Error");
     return null;
   }
 }

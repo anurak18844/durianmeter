@@ -1,4 +1,5 @@
 import 'package:durianmeter/Screens/homeScreen.dart';
+import 'package:durianmeter/Screens/homeTabs.dart';
 import 'package:durianmeter/Screens/registerScreen.dart';
 import 'package:durianmeter/Utils/globalVariables.dart';
 import 'package:flutter/cupertino.dart';
@@ -32,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isCallInProgress = false;
   final TextEditingController _user = TextEditingController();
   final TextEditingController _token = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -44,256 +46,264 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget build(BuildContext context) {
-        return Scaffold(
-            body: Container(
-              width: double.infinity,
-              padding: EdgeInsets.only(top: 50.0, left: 8.0, right: 8.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.accessible_forward_outlined,
-                      size: 100.0,
-                    ),
-                    SizedBox(
-                      height: 8.0,
-                    ),
-                    Text(
-                      'SIGN IN',
-                      style: TextStyle(
-                          fontSize: 40.0,
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Form(
-                        key: _formkey,
-                        child: Column(
-                          children: [
-                            SizedBox(
-                              height: 30.0,
-                            ),
-                            TextFormField(
-                              validator: RequiredValidator(
-                                    errorText: 'Enter your username please!'),
+    double _width = MediaQuery.of(context).copyWith().size.width;
+    double _height = MediaQuery.of(context).copyWith().size.height;
 
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Enter your username',
-                                hintText: 'Enter Your username',
-                                icon: Icon(
-                                  Icons.account_box_outlined,
-                                  size: 50.0,
-                                ),
-                              ),
-                              keyboardType: TextInputType.emailAddress,
-                              onSaved: (String? username) {
-                                user.username = username;
-                              },
-                            ),
-                            SizedBox(
-                              height: 30.0,
-                            ),
-                            TextFormField(
-                              validator: RequiredValidator(
-                                  errorText: 'Enter your password please!'),
-                              obscureText: true,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Enter your password',
-                                hintText: 'Enter Your password',
-                                icon: Icon(
-                                  Icons.lock_outline,
-                                  size: 50.0,
-                                ),
-                              ),
-                              onSaved: (String? password) {
-                                user.password = password;
-                              },
-                            ),
-                            SizedBox(
-                              height: 10.0,
-                            ),
-                            SizedBox(
-                              height: 20.0,
-                              child: Container(
-                                alignment: Alignment.centerRight,
-                                child: InkWell(
-                                  child: Text(
-                                    'Register Account.',
-                                    style: TextStyle(
-                                        decoration: TextDecoration.underline),
-                                  ),
-                                  onTap: () {
-                                    Navigator.pushReplacement(context,
-                                        MaterialPageRoute(builder: (context) => RegisterScreen()));
-                                  },
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 20.0,
-                            ),
-                            Container(
-                              height: 50.0,
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(remember
-                                            ? Icons.check_box
-                                            : Icons.check_box_outline_blank),
-                                        onPressed: () {
-                                          setState(() {
-                                            if (remember) {
-                                              remember = false;
-                                            } else {
-                                              remember = true;
-                                            }
-                                          });
-                                        },
-                                      ),
-                                      Text('Remember Me.'),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    width: 150.0,
-                                    height: 50.0,
-                                    child: ElevatedButton(
-                                      child: Text(
-                                        'LOGIN',
-                                        style: TextStyle(
-                                            fontSize: 18.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      onPressed: () async {
-                                        if (_formkey.currentState!.validate()) {
-                                          _formkey.currentState!.save();
-                                          setState(() {
-                                            this.isCallInProgress = true;
-                                          });
-                                          CallApi().loginCustomer(user.username, user.password).then(
-                                              (response) async {
-                                                setState(() {
-                                                  this.isCallInProgress = false;
-                                                });
-                                                print(response?.token);
-                                                if(response!.token != ''){
-                                                  Fluttertoast.showToast(
-                                                    msg: 'LOGIN SUCCESS!!!!',
-                                                    gravity: ToastGravity.CENTER,
-                                                  );
-                                                  userToken = response.token;
-                                                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
-                                                }
-                                              }
-                                          );
-                                        } else {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                            content: Text(
-                                                'Please check correctness !.'),
-                                          ));
-                                        }
-                                      },
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ],
-                        )),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    SizedBox(
-                        height: 20.0,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                                child: Container(
-                                  child: Divider(
-                                    color: Colors.black,
-                                    height: 36,
-                                  ),
-                                )),
-                            Text(' OR SIGN WITH '),
-                            Expanded(
-                                child: Container(
-                                  child: Divider(
-                                    color: Colors.black,
-                                    height: 36,
-                                  ),
-                                )),
-                          ],
-                        )),
+    return Scaffold(
+        body: Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(top: 50.0, left: 8.0, right: 8.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.accessible_forward_outlined,
+              size: 100.0,
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+            Text(
+              'SIGN IN',
+              style: TextStyle(
+                  fontSize: 40.0,
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold),
+            ),
+            Form(
+                key: _formkey,
+                child: Column(
+                  children: [
                     SizedBox(
                       height: 30.0,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            print('Login With Facebook');
-                            _googleSignIn.disconnect();
-                            //print('${_currentUser}');
-                          },
-                          child: Container(
-                              height: 60.0,
-                              width: 60.0,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    offset: Offset(0, 2),
-                                    blurRadius: 6.0,
-                                  )
-                                ],
-                                image: DecorationImage(
-                                  image: NetworkImage(
-                                      "https://facebookbrand.com/wp-content/uploads/2019/04/f_logo_RGB-Hex-Blue_512.png?w=512&h=512"),
-                                ),
-                              )),
+                    TextFormField(
+                      validator: RequiredValidator(
+                          errorText: 'Enter your username please!'),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Enter your username',
+                        hintText: 'Enter Your username',
+                        icon: Icon(
+                          Icons.account_box_outlined,
+                          size: 50.0,
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            _handleSignIn();
-                            print('Login With Google');
-                            //print('${_currentUser}');
-                            //push
-                          },
-                          child: Container(
-                              height: 60.0,
-                              width: 60.0,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    offset: Offset(0, 2),
-                                    blurRadius: 6.0,
-                                  )
-                                ],
-                                image: DecorationImage(
-                                  image: NetworkImage(
-                                      "https://www.pikpng.com/pngl/b/44-442110_jpg-black-and-white-library-google-logo-png.png"),
-                                ),
-                              )),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      onSaved: (String? username) {
+                        user.username = username;
+                      },
+                    ),
+                    SizedBox(
+                      height: 30.0,
+                    ),
+                    TextFormField(
+                      validator: RequiredValidator(
+                          errorText: 'Enter your password please!'),
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Enter your password',
+                        hintText: 'Enter Your password',
+                        icon: Icon(
+                          Icons.lock_outline,
+                          size: 50.0,
                         ),
-                      ],
-                    )
+                      ),
+                      onSaved: (String? password) {
+                        user.password = password;
+                      },
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                      child: Container(
+                        alignment: Alignment.centerRight,
+                        child: InkWell(
+                          child: Text(
+                            'Register Account.',
+                            style:
+                                TextStyle(decoration: TextDecoration.underline),
+                          ),
+                          onTap: () {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => RegisterScreen()));
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    Container(
+                      height: 50.0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(remember
+                                    ? Icons.check_box
+                                    : Icons.check_box_outline_blank),
+                                onPressed: () {
+                                  setState(() {
+                                    if (remember) {
+                                      remember = false;
+                                    } else {
+                                      remember = true;
+                                    }
+                                  });
+                                },
+                              ),
+                              Text('Remember Me.'),
+                            ],
+                          ),
+                          SizedBox(
+                            width: 150.0,
+                            height: 50.0,
+                            child: ElevatedButton(
+                              child: Text(
+                                'LOGIN',
+                                style: TextStyle(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              onPressed: () async {
+                                if (_formkey.currentState!.validate()) {
+                                  _formkey.currentState!.save();
+                                  setState(() {
+                                    this.isCallInProgress = true;
+                                  });
+                                  CallApi()
+                                      .loginCustomer(
+                                          user.username, user.password)
+                                      .then((response) async {
+                                    setState(() {
+                                      this.isCallInProgress = false;
+                                    });
+                                    print(response?.token);
+                                    if (response!.token != '') {
+                                      Fluttertoast.showToast(
+                                        msg: 'LOGIN SUCCESS!!!!',
+                                        gravity: ToastGravity.CENTER,
+                                      );
+                                      userToken = response.token;
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  HomeTabs()));
+                                    }
+                                  });
+                                } else {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content:
+                                        Text('Please check correctness !.'),
+                                  ));
+                                }
+                              },
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   ],
+                )),
+            SizedBox(
+              height: 20.0,
+            ),
+            SizedBox(
+                height: 20.0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                        child: Container(
+                      child: Divider(
+                        color: Colors.black,
+                        height: 36,
+                      ),
+                    )),
+                    Text(' OR SIGN WITH '),
+                    Expanded(
+                        child: Container(
+                      child: Divider(
+                        color: Colors.black,
+                        height: 36,
+                      ),
+                    )),
+                  ],
+                )),
+            SizedBox(
+              height: 30.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    print('Login With Facebook');
+                    _googleSignIn.disconnect();
+                    //print('${_currentUser}');
+                  },
+                  child: Container(
+                      height: 60.0,
+                      width: 60.0,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            offset: Offset(0, 2),
+                            blurRadius: 6.0,
+                          )
+                        ],
+                        image: DecorationImage(
+                          image: NetworkImage(
+                              "https://facebookbrand.com/wp-content/uploads/2019/04/f_logo_RGB-Hex-Blue_512.png?w=512&h=512"),
+                        ),
+                      )),
                 ),
-              ),
-            ));
+                GestureDetector(
+                  onTap: () {
+                    _handleSignIn();
+                    print('Login With Google');
+                    //print('${_currentUser}');
+                    //push
+                  },
+                  child: Container(
+                      height: 60.0,
+                      width: 60.0,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            offset: Offset(0, 2),
+                            blurRadius: 6.0,
+                          )
+                        ],
+                        image: DecorationImage(
+                          image: NetworkImage(
+                              "https://www.pikpng.com/pngl/b/44-442110_jpg-black-and-white-library-google-logo-png.png"),
+                        ),
+                      )),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    ));
     // return FutureBuilder(
     //     future: firebase,
     //     builder: (context, snapshot) {

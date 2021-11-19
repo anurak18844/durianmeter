@@ -4,9 +4,10 @@
 
 import 'dart:convert';
 
-DatasetResponse datasetResponseFromJson(String str) => DatasetResponse.fromJson(json.decode(str));
-
-String datasetResponseToJson(DatasetResponse data) => json.encode(data.toJson());
+DatasetResponse datasetResponseFromJson(String str) =>
+    DatasetResponse.fromJson(json.decode(str));
+String datasetResponseToJson(DatasetResponse data) =>
+    json.encode(data.toJson());
 
 class DatasetResponse {
   DatasetResponse({
@@ -29,25 +30,26 @@ class DatasetResponse {
   final double? dryWeight;
   final DateTime createdOn;
 
-  factory DatasetResponse.fromJson(Map<String, dynamic> json) => DatasetResponse(
-    id: json["id"],
-    user: json["user"],
-    no: json["no"],
-    knockSound: json["knock_sound"],
-    maturityScore: json["maturity_score"],
-    brix: json["brix"]??0.0,
-    dryWeight: json["dry_weight"]??0.0,
-    createdOn: DateTime.parse(json["created_on"]),
-  );
+  factory DatasetResponse.fromJson(Map<String, dynamic> json) =>
+      DatasetResponse(
+        id: json["id"],
+        user: json["user"],
+        no: json["no"],
+        knockSound: json["knock_sound"],
+        maturityScore: json["maturity_score"],
+        brix: json["brix"] ?? 0.0,
+        dryWeight: json["dry_weight"] ?? 0.0,
+        createdOn: DateTime.parse(json["created_on"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "user": user,
-    "no": no,
-    "knock_sound": knockSound,
-    "maturity_score": maturityScore,
-    "brix": brix,
-    "dry_weight": dryWeight,
-    "created_on": createdOn.toIso8601String(),
-  };
+        "id": id,
+        "user": user,
+        "no": no,
+        "knock_sound": knockSound,
+        "maturity_score": maturityScore,
+        "brix": brix,
+        "dry_weight": dryWeight,
+        "created_on": createdOn.toIso8601String(),
+      };
 }

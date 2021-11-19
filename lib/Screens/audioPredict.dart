@@ -7,6 +7,7 @@ import 'package:durianmeter/Network/restApi.dart';
 import 'package:durianmeter/Screens/send_request.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
@@ -15,16 +16,16 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../Models/predictRequest.dart';
 
-class AudioPredict extends StatefulWidget {
+class AudioPredictScreen extends StatefulWidget {
   final LocalFileSystem localFileSystem;
-  AudioPredict({localFileSystem})
+  AudioPredictScreen({localFileSystem})
       : this.localFileSystem = localFileSystem ?? LocalFileSystem();
 
   @override
-  _AudioPredictState createState() => _AudioPredictState();
+  _AudioPredictScreenState createState() => _AudioPredictScreenState();
 }
 
-class _AudioPredictState extends State<AudioPredict> {
+class _AudioPredictScreenState extends State<AudioPredictScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,6 +62,8 @@ class RecorderExampleState extends State<RecorderExample>
   double maturityValue = 0;
   double valueStart = 100;
 
+  final Future<FirebaseApp> firebase = Firebase.initializeApp();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -86,8 +89,8 @@ class RecorderExampleState extends State<RecorderExample>
               CustomPaint(
                 foregroundPainter: CircleProgress(animation!.value),
                 child: Container(
-                  width: 200,
-                  height: 200,
+                  width: 300,
+                  height: 300,
                   child: Center(
                       child: Text(
                     "${animation!.value.toInt()}%",
@@ -112,14 +115,13 @@ class RecorderExampleState extends State<RecorderExample>
                 height: 50.0,
               ),
               Container(
-                width: 270,
+                width: 300,
                 height: 75,
                 child: RaisedButton(
                   onPressed: () {
                     progressController!.reverse();
                     setState(() {
                       record = !record;
-                      statusText = "กำลังบันทึกเสียง ..";
                     });
                     switch (_currentStatus) {
                       case RecordingStatus.Initialized:
@@ -131,7 +133,6 @@ class RecorderExampleState extends State<RecorderExample>
                         {
                           _stop();
                           setState(() {
-                            statusText = "กำลังรอรับเสียง";
                             firstPredict = false;
                           });
                           _init();
@@ -532,6 +533,9 @@ class RecorderExampleState extends State<RecorderExample>
   }
 
   _start() async {
+    setState(() {
+      statusText = "กำลังบันทึกเสียง..";
+    });
     try {
       await _recorder!.start();
       var recording = await _recorder!.current(channel: 0);
@@ -558,6 +562,9 @@ class RecorderExampleState extends State<RecorderExample>
   }
 
   _stop() async {
+    setState(() {
+      statusText = "กำลังประมวลผล..";
+    });
     var result = await _recorder!.stop();
     print("Stop recording: ${result!.path}");
     print("Stop recording: ${result.duration}");
@@ -576,6 +583,9 @@ class RecorderExampleState extends State<RecorderExample>
     );
 
     CallApi().getPrediction(p).then((resp) {
+      setState(() {
+        statusText = "ประมวลผลเสร็จสิ้น";
+      });
       print("Here I am!!!!!!!");
       print(resp!.maturityScore.toString());
       if (resp.maturityScore == null) {
@@ -591,12 +601,11 @@ class RecorderExampleState extends State<RecorderExample>
         setState(() {
           predictData = resp.maturityScore.toString() + "%";
           maturityValue = resp.maturityScore!.toDouble();
-          animation = Tween<double>(begin: 0,end: maturityValue).animate(progressController!)..addListener(() {
-            setState(() {
-
+          animation = Tween<double>(begin: 0, end: maturityValue)
+              .animate(progressController!)
+            ..addListener(() {
+              setState(() {});
             });
-
-          });
           progressController!.forward();
           Fluttertoast.showToast(
             msg: predictData,
