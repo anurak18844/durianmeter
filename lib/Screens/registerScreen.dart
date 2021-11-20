@@ -1,12 +1,8 @@
-import 'package:durianmeter/Models/authUser.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:simple_gradient_text/simple_gradient_text.dart';
 
-import 'loginScreen.dart';
+import '../Models/authUser.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -16,242 +12,301 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  AuthUser auth = AuthUser();
-  final _formkey = GlobalKey<FormState>();
-  var agree = false;
-  final Future<FirebaseApp> firebase = Firebase.initializeApp();
-  final TextEditingController _pass = TextEditingController();
+  AuthUser user = AuthUser();
+  var _hiddenPassword = true;
+  var _hiddenPassword2 = true;
+  var _chkTextBox = false;
+  String? chkPassword;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _confirmPass = TextEditingController();
+  final TextEditingController _passWord = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: firebase,
-        builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.done) {
-        return Container(
-            child: Scaffold(
-                body: Container(
-                  //height: double.infinity,
-                  width: double.infinity,
-                  padding: EdgeInsets.only(top: 50.0, left: 8.0, right: 8.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.accessible_forward_outlined,
-                          size: 100.0,
+    double width = MediaQuery.of(context).copyWith().size.width;
+    double height = MediaQuery.of(context).copyWith().size.height;
+
+    return Scaffold(
+      //-----------------------APP BAR---------------------------------------
+      appBar: AppBar(
+        title: GradientText(
+          'REGISTER',
+          style: TextStyle(
+            fontSize: 24,
+          ),
+          colors: [
+            Colors.blue.shade900,
+            Colors.blue.shade900,
+            Colors.green.shade400,
+            Colors.green.shade400,
+          ],
+          gradientType: GradientType.linear,
+        ),
+        backgroundColor: Colors.white,
+        //-----------------------ICON ARROW---------------------------------------
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: Colors.black,
+            size: 24,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Container(
+        color: Colors.white,
+        padding: EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 50),
+        width: width,
+        height: height,
+        child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  //-----------------------E-MAIL---------------------------------------
+                  _buildTextFieldEmail(
+                      TextInputType.emailAddress, "EMAIL", "example@gmail.com"),
+                  //-----------------------FULL NAME---------------------------------------
+                  _buildTextFieldFullName(
+                      TextInputType.emailAddress, "FULL NAME", "Name Lastname"),
+                  //-----------------------TELEPHONE NUMBER---------------------------------------
+                  _buildTextFieldTelePhone(
+                      TextInputType.phone, "TELEPHONE NUMBER", "0812345678"),
+                  //-----------------------PASSWORD---------------------------------------
+                  _buildPasswordField("PASSWORD", "12345678"),
+                  //-----------------------CONFIRM PASSWORD---------------------------------------
+                  _buildPasswordField2("CONFIRM PASSWORD", "12345678"),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      //-----------------------ACCEPT AGREEMENT---------------------------------------
+                      IconButton(
+                        icon: Icon(_chkTextBox
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank),
+                        onPressed: () {
+                          _setStateChkBox();
+                        },
+                      ),
+                      Text(
+                        "Accept Agreement ",
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      InkWell(
+                          child: new Text(
+                            'Learn more.',
+                            style: TextStyle(
+                                fontSize: 12,
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          onTap: () {
+                            print("READ AGREEMENT.");
+                          }),
+                    ],
+                  ),
+                  //-----------------------BUTTON REGISTER---------------------------------------
+                  Container(
+                    padding: EdgeInsets.only(
+                        top: 30, left: 10, right: 10, bottom: 10),
+                    child: RaisedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          print(user.username);
+                          print(user.password);
+                          print(user.firstname);
+                          print(user.tel);
+                          _formKey.currentState!.reset();
+                          _passWord.text = '';
+                          _confirmPass.text = '';
+                        }
+                        Navigator.pop(context);
+                      },
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(80.0)),
+                      padding: const EdgeInsets.all(0.0),
+                      child: Ink(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: <Color>[
+                              Color(0xFF0D47A1),
+                              Color(0xFF66BB6A),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(80.0)),
                         ),
-                        SizedBox(
-                          height: 8.0,
+                        child: Container(
+                          constraints: const BoxConstraints(
+                              minWidth: double.infinity,
+                              minHeight:
+                                  60.0), // min sizes for Material buttons
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'REGISTER',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white, fontSize: 24),
+                          ),
                         ),
-                        Text(
-                          'REGISTER',
-                          style: TextStyle(
-                              fontSize: 40.0,
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Form(
-                            key: _formkey,
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  height: 30.0,
-                                ),
-                                TextFormField(
-                                  validator: MultiValidator([
-                                    EmailValidator(
-                                        errorText: 'Enter a valid email address'),
-                                    RequiredValidator(
-                                        errorText: 'Enter your E-Mail please!')
-                                  ]),
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    labelText: 'Enter your username',
-                                    hintText: 'Enter Your username',
-                                    icon: Icon(
-                                      Icons.account_box_outlined,
-                                      size: 50.0,
-                                    ),
-                                  ),
-                                  keyboardType: TextInputType.emailAddress,
-                                  onSaved: (String? email) {
-                                    auth.email = email;
-                                  },
-                                ),
-                                SizedBox(
-                                  height: 30.0,
-                                ),
-                                TextFormField(
-                                  controller: _pass,
-                                  validator: RequiredValidator(errorText: 'Enter your password.'),
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    labelText: 'Enter your password',
-                                    hintText: 'Enter Your password',
-                                    icon: Icon(
-                                      Icons.lock_outline,
-                                      size: 50.0,
-                                    ),
-                                  ),
-                                  onSaved: (String? password) {
-                                    auth.password = password;
-                                  },
-                                ),
-                                SizedBox(
-                                  height: 30.0,
-                                ),
-                                TextFormField(
-                                  controller: _confirmPass,
-                                  validator: (val) {
-                                    if (val!.isEmpty) {
-                                      return 'Enter yout password confirm please!';
-                                    } else if (_pass.text != _confirmPass.text) {
-                                      return 'Password does not math!';
-                                    } else {
-                                      return null;
-                                    }
-                                  },
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    labelText: 'Enter your confirm passwo rd',
-                                    hintText: 'Enter Your confirm password',
-                                    icon: Icon(
-                                      Icons.lock_outline,
-                                      size: 50.0,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 10.0,
-                                ),
-                                SizedBox(
-                                  height: 20.0,
-                                ),
-                                Container(
-                                  height: 50.0,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(agree
-                                                ? Icons.check_box
-                                                : Icons.check_box_outline_blank),
-                                            onPressed: () {
-                                              setState(() {
-                                                if (agree) {
-                                                  agree = false;
-                                                } else {
-                                                  agree = true;
-                                                }
-                                              });
-                                            },
-                                          ),
-                                          Text('Accept the agreements.  '),
-                                          SizedBox(
-                                            height: 20.0,
-                                            child: Container(
-                                              alignment: Alignment.centerRight,
-                                              child: InkWell(
-                                                child: Text(
-                                                  'Learn More.',
-                                                  style: TextStyle(
-                                                      decoration:
-                                                      TextDecoration.underline),
-                                                ),
-                                                onTap: () {
-                                                  Navigator.push(context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) {
-                                                            return RegisterScreen();
-                                                          }));
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 30,
-                                ),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 50.0,
-                                  child: ElevatedButton(
-                                    child: Text(
-                                      'REGISTER',
-                                      style: TextStyle(
-                                          fontSize: 18.0, fontWeight: FontWeight.bold),
-                                    ),
-                                    onPressed: () async {
-                                      if (_formkey.currentState!.validate()) {
-                                        if (agree == false) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                            content: Text('Accept the agreements!.'),
-                                          ));
-                                        } else {
-                                          _formkey.currentState!.save();
-                                          try {
-                                            await FirebaseAuth.instance
-                                                .createUserWithEmailAndPassword(
-                                                email: auth.email.toString(),
-                                                password: auth.password.toString())
-                                                .then((value) {
-                                              Fluttertoast.showToast(
-                                                msg: 'REGISTER SUCCESS.!',
-                                                gravity: ToastGravity.CENTER,
-                                              );
-                                              Navigator.pushReplacement(context,
-                                                  MaterialPageRoute(builder: (context) {
-                                                    return LoginScreen();
-                                                  }));
-                                            });
-                                          } on FirebaseAuthException catch (e) {
-                                            print(e.message);
-                                            Fluttertoast.showToast(
-                                              msg: e.message.toString(),
-                                              gravity: ToastGravity.CENTER,
-                                            );
-                                          }
-                                        }
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(SnackBar(
-                                          content: Text('Please check correctness.'),
-                                        ));
-                                      }
-                                    },
-                                  ),
-                                )
-                              ],
-                            )),
-                      ],
+                      ),
                     ),
                   ),
-                )));
-      }
-      else if(snapshot.hasError){
-        return Scaffold(
-          body: Text('${snapshot.error}'),
-        );
-      }
-      else {
-        print('No Data');
-        return Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
+                ],
+              ),
+            )),
+      ),
+    );
+  }
+
+  Widget _buildTextFieldEmail(
+      TextInputType textInputType, String labelText, String hintText) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: TextFormField(
+        keyboardType: textInputType,
+        cursorColor: Colors.black,
+        decoration: InputDecoration(
+          border: UnderlineInputBorder(),
+          labelText: labelText,
+          hintText: hintText,
+        ),
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Enter a some text'),
+          EmailValidator(errorText: 'Enter a valid email address')
+        ]),
+        onSaved: (String? username) {
+          user.username = username;
+        },
+      ),
+    );
+  }
+
+  Widget _buildTextFieldFullName(
+      TextInputType textInputType, String labelText, String hintText) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: TextFormField(
+        keyboardType: textInputType,
+        cursorColor: Colors.black,
+        decoration: InputDecoration(
+          border: UnderlineInputBorder(),
+          labelText: labelText,
+          hintText: hintText,
+        ),
+        validator: RequiredValidator(errorText: 'Enter a some text'),
+        onSaved: (String? fullName) {
+          user.firstname = fullName;
+        },
+      ),
+    );
+  }
+
+  Widget _buildTextFieldTelePhone(
+      TextInputType textInputType, String labelText, String hintText) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: TextFormField(
+        keyboardType: textInputType,
+        cursorColor: Colors.black,
+        decoration: InputDecoration(
+          border: UnderlineInputBorder(),
+          labelText: labelText,
+          hintText: hintText,
+        ),
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Enter a some text'),
+          MinLengthValidator(10,
+              errorText: 'Telephone must be at least 10 digits long'),
+          MaxLengthValidator(10,
+              errorText: 'Telephone must be at More 10 digits long'),
+        ]),
+        onSaved: (String? telePhone) {
+          user.tel = telePhone;
+        },
+      ),
+    );
+  }
+
+  Widget _buildPasswordField(String labelText, String hintText) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: TextFormField(
+        controller: _passWord,
+        obscureText: _hiddenPassword,
+        keyboardType: TextInputType.emailAddress,
+        cursorColor: Colors.black,
+        decoration: InputDecoration(
+          suffixIcon: InkWell(
+            onTap: _togglePasswordView,
+            child:
+                Icon(_hiddenPassword ? Icons.visibility_off : Icons.visibility),
           ),
-        );
-      }
+          border: UnderlineInputBorder(),
+          labelText: labelText,
+          hintText: hintText,
+        ),
+        validator: MultiValidator([
+          RequiredValidator(errorText: 'Enter a some text'),
+          MinLengthValidator(8,
+              errorText: 'Password must be at least 8 digits long'),
+        ]),
+        onChanged: (val) => chkPassword = val,
+        onSaved: (String? password) {
+          user.password = password;
+        },
+      ),
+    );
+  }
+
+  Widget _buildPasswordField2(String labelText, String hintText) {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: TextFormField(
+        controller: _confirmPass,
+        obscureText: _hiddenPassword2,
+        keyboardType: TextInputType.emailAddress,
+        cursorColor: Colors.black,
+        decoration: InputDecoration(
+          suffixIcon: InkWell(
+            onTap: _togglePasswordView2,
+            child: Icon(
+                _hiddenPassword2 ? Icons.visibility_off : Icons.visibility),
+          ),
+          border: UnderlineInputBorder(),
+          labelText: labelText,
+          hintText: hintText,
+        ),
+        validator: (val) {
+          if (val!.isEmpty || val == null) {
+            return 'Enter a some text';
+          } else if (_passWord.text != _confirmPass.text) {
+            return 'Password does not math';
+          } else {
+            return null;
+          }
+        },
+      ),
+    );
+  }
+
+  void _togglePasswordView() {
+    setState(() {
+      _hiddenPassword = !_hiddenPassword;
+    });
+    print(_hiddenPassword);
+  }
+
+  void _togglePasswordView2() {
+    setState(() {
+      _hiddenPassword2 = !_hiddenPassword2;
+    });
+    print(_hiddenPassword2);
+  }
+
+  void _setStateChkBox() {
+    setState(() {
+      _chkTextBox = !_chkTextBox;
     });
   }
 }

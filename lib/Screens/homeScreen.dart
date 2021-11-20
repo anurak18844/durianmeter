@@ -3,6 +3,7 @@ import 'package:durianmeter/Models/authResponse.dart';
 import 'package:durianmeter/Network/restApi.dart';
 import 'package:durianmeter/Screens/qrScanner.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../Utils/globalVariables.dart';
 
@@ -211,13 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 alignment: Alignment.center,
                 width: 60,
                 height: 60,
-                child: Text(
-                  '${rd.maturityScore}%',
-                  style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.teal,
-                      fontWeight: FontWeight.bold),
-                ),
+                child: _textColorMaturity(rd.maturityScore),
               ),
               trailing:
                   Icon(Icons.arrow_forward_ios_outlined, color: Colors.black87),
@@ -226,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(color: Colors.black, fontSize: 15),
               ),
               subtitle: Text(
-                '${rd.createdOn}%',
+                'วันที่ : ${DateFormat("dd-MM-yyy hh:mm:ss").format(rd.createdOn)}',
                 style: TextStyle(color: Colors.black54, fontSize: 12),
               ),
               onTap: () {
@@ -270,6 +265,55 @@ class _HomeScreenState extends State<HomeScreen> {
             bottomRight: Radius.circular(3.0)),
         color: Colors.white,
       ),
+    );
+  }
+
+  Widget _textColorMaturity(int? score) {
+    Color c = Colors.teal;
+    switch (score) {
+      case 70:
+        {
+          c = Colors.teal;
+          break;
+        }
+      case 75:
+        {
+          c = Color.fromARGB(255, 0, 150, 92);
+          break;
+        }
+      case 80:
+        {
+          c = Color.fromARGB(255, 0, 150, 67);
+          break;
+        }
+      case 85:
+        {
+          c = Color.fromARGB(255, 0, 150, 32);
+          break;
+        }
+      case 85:
+        {
+          c = Color.fromARGB(255, 30, 150, 0);
+          break;
+        }
+      case 90:
+        {
+          c = Color.fromARGB(255, 72, 150, 0);
+          break;
+        }
+      case 95:
+        {
+          c = Color.fromARGB(255, 109, 167, 2);
+          break;
+        }
+      case 100:
+        {
+          c = Color.fromARGB(255, 231, 228, 6);
+        }
+    }
+    return Text(
+      '${score}%',
+      style: TextStyle(fontSize: 24, color: c, fontWeight: FontWeight.bold),
     );
   }
 }

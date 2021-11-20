@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:simple_gradient_text/simple_gradient_text.dart';
 import '../Network/restApi.dart';
 import '../Models/authUser.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -27,8 +28,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   // final Future<FirebaseApp> firebase = Firebase.initializeApp();
   // GoogleSignInAccount? _currentUser;
+  var _hiddenPassword = true;
   final _formkey = GlobalKey<FormState>();
   var remember = false;
+  var _chkTextBox = false;
   AuthUser user = AuthUser();
   bool isCallInProgress = false;
   final TextEditingController _user = TextEditingController();
@@ -51,25 +54,47 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
         body: Container(
+      color: Colors.white,
       width: double.infinity,
       padding: EdgeInsets.only(top: 50.0, left: 8.0, right: 8.0),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
-              Icons.accessible_forward_outlined,
-              size: 100.0,
+            Image(
+              image: AssetImage('assets/logo.png'),
+              width: _width * 0.8,
+              height: _height * .2,
             ),
             SizedBox(
               height: 8.0,
             ),
-            Text(
-              'SIGN IN',
-              style: TextStyle(
-                  fontSize: 40.0,
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold),
+            // Container(
+            //   padding: EdgeInsets.only(top: 20),
+            //   width: double.infinity,
+            //   child: Text(
+            //     'LOGIN',
+            //     style: TextStyle(
+            //         fontSize: 24,
+            //         fontWeight: FontWeight.bold,
+            //         color: Colors.green),
+            //   ),
+            // ),
+            Container(
+              padding: EdgeInsets.only(top: 20, left: 10),
+              width: double.infinity,
+              child: GradientText(
+                'LOGIN',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                colors: [
+                  Colors.blue.shade900,
+                  Colors.green.shade400,
+                  Colors.green.shade400,
+                  Colors.green.shade400,
+                  Colors.green.shade400,
+                ],
+                gradientType: GradientType.linear,
+              ),
             ),
             Form(
                 key: _formkey,
@@ -79,16 +104,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 30.0,
                     ),
                     TextFormField(
+                      cursorColor: Colors.black,
                       validator: RequiredValidator(
                           errorText: 'Enter your username please!'),
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Enter your username',
-                        hintText: 'Enter Your username',
-                        icon: Icon(
-                          Icons.account_box_outlined,
-                          size: 50.0,
-                        ),
+                        border: UnderlineInputBorder(),
+                        labelText: "USERNAME",
+                        hintText: "user.example",
                       ),
                       keyboardType: TextInputType.emailAddress,
                       onSaved: (String? username) {
@@ -99,121 +121,208 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 30.0,
                     ),
                     TextFormField(
+                      keyboardType: TextInputType.emailAddress,
+                      cursorColor: Colors.black,
                       validator: RequiredValidator(
                           errorText: 'Enter your password please!'),
-                      obscureText: true,
+                      obscureText: _hiddenPassword,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Enter your password',
-                        hintText: 'Enter Your password',
-                        icon: Icon(
-                          Icons.lock_outline,
-                          size: 50.0,
+                        suffixIcon: InkWell(
+                          onTap: _togglePasswordView,
+                          child: Icon(_hiddenPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
                         ),
+                        border: UnderlineInputBorder(),
+                        labelText: "PASSWORD",
+                        hintText: "12345678",
                       ),
                       onSaved: (String? password) {
                         user.password = password;
                       },
                     ),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                    SizedBox(
-                      height: 20.0,
-                      child: Container(
-                        alignment: Alignment.centerRight,
-                        child: InkWell(
-                          child: Text(
-                            'Register Account.',
-                            style:
-                                TextStyle(decoration: TextDecoration.underline),
-                          ),
-                          onTap: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => RegisterScreen()));
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20.0,
-                    ),
                     Container(
-                      height: 50.0,
+                      padding: EdgeInsets.all(10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(
                             children: [
+                              //-----------------------REMEMBERME---------------------------------------
                               IconButton(
-                                icon: Icon(remember
+                                icon: Icon(_chkTextBox
                                     ? Icons.check_box
                                     : Icons.check_box_outline_blank),
                                 onPressed: () {
-                                  setState(() {
-                                    if (remember) {
-                                      remember = false;
-                                    } else {
-                                      remember = true;
-                                    }
-                                  });
+                                  _setStateChkBox();
                                 },
                               ),
-                              Text('Remember Me.'),
+                              Text(
+                                "Remember Me.",
+                                style: TextStyle(fontSize: 12),
+                              )
                             ],
                           ),
-                          SizedBox(
-                            width: 150.0,
-                            height: 50.0,
-                            child: ElevatedButton(
-                              child: Text(
-                                'LOGIN',
+                          //-----------------------FORGOT PASSWORD---------------------------------------
+                          InkWell(
+                              child: new Text(
+                                'Forgot Password',
                                 style: TextStyle(
-                                    fontSize: 18.0,
+                                    fontSize: 12,
+                                    decoration: TextDecoration.underline,
                                     fontWeight: FontWeight.bold),
                               ),
-                              onPressed: () async {
-                                if (_formkey.currentState!.validate()) {
-                                  _formkey.currentState!.save();
-                                  setState(() {
-                                    this.isCallInProgress = true;
-                                  });
-                                  CallApi()
-                                      .loginCustomer(
-                                          user.username, user.password)
-                                      .then((response) async {
-                                    setState(() {
-                                      this.isCallInProgress = false;
-                                    });
-                                    print(response?.token);
-                                    if (response!.token != '') {
-                                      Fluttertoast.showToast(
-                                        msg: 'LOGIN SUCCESS!!!!',
-                                        gravity: ToastGravity.CENTER,
-                                      );
-                                      userToken = response.token;
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  HomeTabs()));
-                                    }
-                                  });
-                                } else {
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(SnackBar(
-                                    content:
-                                        Text('Please check correctness !.'),
-                                  ));
-                                }
-                              },
-                            ),
-                          )
+                              onTap: () {
+                                print("FORGOT PASSWORD");
+                              }),
                         ],
                       ),
                     ),
+                    //-----------------------BUTTON LOGIN---------------------------------------
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: RaisedButton(
+                        onPressed: () {
+                          if (_formkey.currentState!.validate()) {
+                            _formkey.currentState!.save();
+                            setState(() {
+                              this.isCallInProgress = true;
+                            });
+                            CallApi()
+                                .loginCustomer(user.username, user.password)
+                                .then((response) async {
+                              setState(() {
+                                this.isCallInProgress = false;
+                              });
+                              print(response?.token);
+                              if (response!.token != '') {
+                                Fluttertoast.showToast(
+                                  msg: 'LOGIN SUCCESS!!!!',
+                                  gravity: ToastGravity.CENTER,
+                                );
+                                userToken = response.token;
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => HomeTabs()));
+                              }
+                            });
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text('Please check correctness !.'),
+                            ));
+                          }
+                        },
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(80.0)),
+                        padding: const EdgeInsets.all(0.0),
+                        child: Ink(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: <Color>[
+                                Color(0xFF0D47A1),
+                                Color(0xFF66BB6A),
+                              ],
+                            ),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(80.0)),
+                          ),
+                          child: Container(
+                            constraints: const BoxConstraints(
+                                minWidth: double.infinity,
+                                minHeight:
+                                    60.0), // min sizes for Material buttons
+                            alignment: Alignment.center,
+                            child: const Text(
+                              'LOGIN',
+                              textAlign: TextAlign.center,
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 24),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('No Account '),
+                          InkWell(
+                              child: new Text(
+                                'Register',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            RegisterScreen()));
+                              }),
+                        ],
+                      ),
+                    ),
+                    // Container(
+                    //   height: 50.0,
+                    //   child: Row(
+                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //     children: [
+                    //       SizedBox(
+                    //         width: 150.0,
+                    //         height: 50.0,
+                    //         child: ElevatedButton(
+                    //           child: Text(
+                    //             'LOGIN',
+                    //             style: TextStyle(
+                    //                 fontSize: 18.0,
+                    //                 fontWeight: FontWeight.bold),
+                    //           ),
+                    //           onPressed: () async {
+                    //             if (_formkey.currentState!.validate()) {
+                    //               _formkey.currentState!.save();
+                    //               setState(() {
+                    //                 this.isCallInProgress = true;
+                    //               });
+                    //               CallApi()
+                    //                   .loginCustomer(
+                    //                       user.username, user.password)
+                    //                   .then((response) async {
+                    //                 setState(() {
+                    //                   this.isCallInProgress = false;
+                    //                 });
+                    //                 print(response?.token);
+                    //                 if (response!.token != '') {
+                    //                   Fluttertoast.showToast(
+                    //                     msg: 'LOGIN SUCCESS!!!!',
+                    //                     gravity: ToastGravity.CENTER,
+                    //                   );
+                    //                   userToken = response.token;
+                    //                   Navigator.pushReplacement(
+                    //                       context,
+                    //                       MaterialPageRoute(
+                    //                           builder: (context) =>
+                    //                               HomeTabs()));
+                    //                 }
+                    //               });
+                    //             } else {
+                    //               ScaffoldMessenger.of(context)
+                    //                   .showSnackBar(SnackBar(
+                    //                 content:
+                    //                     Text('Please check correctness !.'),
+                    //               ));
+                    //             }
+                    //           },
+                    //         ),
+                    //       )
+                    //     ],
+                    //   ),
+                    // ),
                   ],
                 )),
             SizedBox(
@@ -583,6 +692,19 @@ class _LoginScreenState extends State<LoginScreen> {
     //         );
     //       }
     //     });
+  }
+
+  void _setStateChkBox() {
+    setState(() {
+      _chkTextBox = !_chkTextBox;
+    });
+  }
+
+  void _togglePasswordView() {
+    setState(() {
+      _hiddenPassword = !_hiddenPassword;
+    });
+    print(_hiddenPassword);
   }
 }
 

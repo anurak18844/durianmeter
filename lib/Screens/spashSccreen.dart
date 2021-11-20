@@ -1,6 +1,6 @@
 import 'dart:async';
-
 import 'package:connectivity/connectivity.dart';
+import 'package:durianmeter/Screens/loginScreen.dart';
 import 'package:flutter/material.dart';
 
 import 'homeTabs.dart';
@@ -24,7 +24,7 @@ class _SpashScreenState extends State<SpashScreen> {
       Timer(Duration(seconds: 2), () {
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-          return HomeTabs();
+          return LoginScreen();
         }));
       });
     }
