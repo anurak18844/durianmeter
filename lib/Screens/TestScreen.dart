@@ -8,11 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
 import 'package:path_provider/path_provider.dart';
-
 import '../Models/predictRequest.dart';
 
-
-void main(){
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIOverlays([]);
   runApp(TestScreen());
@@ -20,7 +18,8 @@ void main(){
 
 class TestScreen extends StatefulWidget {
   final LocalFileSystem localFileSystem;
-  TestScreen({localFileSystem}) : this.localFileSystem = localFileSystem ?? LocalFileSystem();
+  TestScreen({localFileSystem})
+      : this.localFileSystem = localFileSystem ?? LocalFileSystem();
 
   @override
   _TestScreenState createState() => _TestScreenState();
@@ -52,7 +51,7 @@ class _TestScreenState extends State<TestScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 15),
                 child: ElevatedButton(
                   child: _buildText(_currentStatus),
-                  onPressed: (){
+                  onPressed: () {
                     print("Status after pressed");
                     print(_currentStatus);
                     //Check mode
@@ -117,6 +116,7 @@ class _TestScreenState extends State<TestScreen> {
       ),
     );
   }
+
   _init() async {
     try {
       bool hasPermission = await FlutterAudioRecorder2.hasPermissions ?? false;
@@ -209,22 +209,24 @@ class _TestScreenState extends State<TestScreen> {
       _currentStatus = _current!.status!;
     });
     //onPlayAudio();
-    PredictRequest p = PredictRequest(userId: "1",knockSound: file, locationLat: "7444444",locationLong: "8787878");
+    PredictRequest p = PredictRequest(
+        userId: "1",
+        knockSound: file,
+        locationLat: "7444444",
+        locationLong: "8787878");
     CallPredictRequest().sendRequest(p);
     print("After stopped");
     print(_currentStatus);
   }
 
-
-
-
   Widget _buildText(RecordingStatus status) {
     var text = "";
     switch (_currentStatus) {
-      case RecordingStatus.Unset:{
-        text = "Preparing...";
-        break;
-      }
+      case RecordingStatus.Unset:
+        {
+          text = "Preparing...";
+          break;
+        }
       case RecordingStatus.Initialized:
       case RecordingStatus.Stopped:
         {
@@ -236,8 +238,11 @@ class _TestScreenState extends State<TestScreen> {
           text = 'Stop';
           break;
         }
+      case RecordingStatus.Paused:
+        // TODO: Handle this case.
+        break;
     }
-    return Text(text, style: TextStyle(color: Colors.white,fontSize: 20.0));
+    return Text(text, style: TextStyle(color: Colors.white, fontSize: 20.0));
   }
 
   void onPlayAudio() async {

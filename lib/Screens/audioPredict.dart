@@ -2,17 +2,16 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:durianmeter/Models/PredictResponse.dart';
+
 import 'package:durianmeter/Network/restApi.dart';
-import 'package:durianmeter/Screens/send_request.dart';
+
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 import '../Models/predictRequest.dart';
 
@@ -592,10 +591,6 @@ class RecorderExampleState extends State<RecorderExample>
         setState(() {
           maturityValue = 0;
           predictData = 'NULL';
-          Fluttertoast.showToast(
-            msg: predictData,
-            gravity: ToastGravity.CENTER,
-          );
         });
       } else {
         setState(() {
@@ -607,10 +602,6 @@ class RecorderExampleState extends State<RecorderExample>
               setState(() {});
             });
           progressController!.forward();
-          Fluttertoast.showToast(
-            msg: predictData,
-            gravity: ToastGravity.CENTER,
-          );
         });
       }
     });
