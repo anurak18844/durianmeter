@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
         body: Container(
       color: Colors.white,
       width: double.infinity,
-      padding: EdgeInsets.only(top: 50.0, left: 8.0, right: 8.0),
+      padding: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -408,7 +408,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       )),
                 ),
               ],
-            )
+            ),
+            SizedBox(height: 20),
           ],
         ),
       ),
