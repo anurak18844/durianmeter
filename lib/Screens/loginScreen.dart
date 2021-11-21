@@ -1,4 +1,3 @@
-import 'package:durianmeter/Screens/homeScreen.dart';
 import 'package:durianmeter/Screens/homeTabs.dart';
 import 'package:durianmeter/Screens/registerScreen.dart';
 import 'package:durianmeter/Utils/globalVariables.dart';
@@ -11,9 +10,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 import '../Network/restApi.dart';
 import '../Models/authUser.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'audioPredict.dart';
 import '../Network/auth_service.dart';
 
 GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['profile', 'email']);
