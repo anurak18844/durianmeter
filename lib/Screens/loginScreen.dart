@@ -33,7 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isCallInProgress = false;
   final TextEditingController _user = TextEditingController();
   final TextEditingController _token = TextEditingController();
-
   @override
   void initState() {
     super.initState();
@@ -50,364 +49,371 @@ class _LoginScreenState extends State<LoginScreen> {
     double _height = MediaQuery.of(context).copyWith().size.height;
 
     return Scaffold(
-        body: Container(
-      color: Colors.white,
-      width: double.infinity,
-      padding: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image(
-              image: AssetImage('assets/logo.png'),
-              width: _width * 0.8,
-              height: _height * .2,
-            ),
-            SizedBox(
-              height: 8.0,
-            ),
-            // Container(
-            //   padding: EdgeInsets.only(top: 20),
-            //   width: double.infinity,
-            //   child: Text(
-            //     'LOGIN',
-            //     style: TextStyle(
-            //         fontSize: 24,
-            //         fontWeight: FontWeight.bold,
-            //         color: Colors.green),
-            //   ),
-            // ),
-            Container(
-              padding: EdgeInsets.only(top: 20, left: 10),
-              width: double.infinity,
-              child: GradientText(
-                'LOGIN',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                colors: [
-                  Colors.blue.shade900,
-                  Colors.green.shade400,
-                  Colors.green.shade400,
-                  Colors.green.shade400,
-                  Colors.green.shade400,
-                ],
-                gradientType: GradientType.linear,
+        body: SafeArea(
+      child: Container(
+        color: Colors.white,
+        width: double.infinity,
+        padding: EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image(
+                image: AssetImage('assets/logo.png'),
+                width: _width * 0.8,
+                height: _height * .2,
               ),
-            ),
-            Form(
-                key: _formkey,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 30.0,
-                    ),
-                    TextFormField(
-                      cursorColor: Colors.black,
-                      validator: RequiredValidator(
-                          errorText: 'Enter your username please!'),
-                      decoration: InputDecoration(
-                        border: UnderlineInputBorder(),
-                        labelText: "USERNAME",
-                        hintText: "user.example",
+              SizedBox(
+                height: 8.0,
+              ),
+              // Container(
+              //   padding: EdgeInsets.only(top: 20),
+              //   width: double.infinity,
+              //   child: Text(
+              //     'LOGIN',
+              //     style: TextStyle(
+              //         fontSize: 24,
+              //         fontWeight: FontWeight.bold,
+              //         color: Colors.green),
+              //   ),
+              // ),
+              Container(
+                padding: EdgeInsets.only(top: 20, left: 10),
+                width: double.infinity,
+                child: GradientText(
+                  'LOGIN',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  colors: [
+                    Colors.blue.shade900,
+                    Colors.green.shade400,
+                    Colors.green.shade400,
+                    Colors.green.shade400,
+                    Colors.green.shade400,
+                  ],
+                  gradientType: GradientType.linear,
+                ),
+              ),
+              Form(
+                  key: _formkey,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 30.0,
                       ),
-                      keyboardType: TextInputType.emailAddress,
-                      onSaved: (String? username) {
-                        user.username = username;
-                      },
-                    ),
-                    SizedBox(
-                      height: 30.0,
-                    ),
-                    TextFormField(
-                      keyboardType: TextInputType.emailAddress,
-                      cursorColor: Colors.black,
-                      validator: RequiredValidator(
-                          errorText: 'Enter your password please!'),
-                      obscureText: _hiddenPassword,
-                      decoration: InputDecoration(
-                        suffixIcon: InkWell(
-                          onTap: _togglePasswordView,
-                          child: Icon(_hiddenPassword
-                              ? Icons.visibility_off
-                              : Icons.visibility),
+                      TextFormField(
+                        cursorColor: Colors.black,
+                        validator: RequiredValidator(
+                            errorText: 'Enter your username please!'),
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          labelText: "USERNAME",
+                          hintText: "user.example",
                         ),
-                        border: UnderlineInputBorder(),
-                        labelText: "PASSWORD",
-                        hintText: "12345678",
-                      ),
-                      onSaved: (String? password) {
-                        user.password = password;
-                      },
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              //-----------------------REMEMBERME---------------------------------------
-                              IconButton(
-                                icon: Icon(_chkTextBox
-                                    ? Icons.check_box
-                                    : Icons.check_box_outline_blank),
-                                onPressed: () {
-                                  _setStateChkBox();
-                                },
-                              ),
-                              Text(
-                                "Remember Me.",
-                                style: TextStyle(fontSize: 12),
-                              )
-                            ],
-                          ),
-                          //-----------------------FORGOT PASSWORD---------------------------------------
-                          InkWell(
-                              child: new Text(
-                                'Forgot Password',
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    decoration: TextDecoration.underline,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              onTap: () {
-                                print("FORGOT PASSWORD");
-                              }),
-                        ],
-                      ),
-                    ),
-                    //-----------------------BUTTON LOGIN---------------------------------------
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      child: RaisedButton(
-                        onPressed: () {
-                          if (_formkey.currentState!.validate()) {
-                            _formkey.currentState!.save();
-                            setState(() {
-                              this.isCallInProgress = true;
-                            });
-                            CallApi()
-                                .loginCustomer(user.username, user.password)
-                                .then((response) async {
-                              setState(() {
-                                this.isCallInProgress = false;
-                              });
-                              print(response?.token);
-                              if (response!.token != '') {
-                                Fluttertoast.showToast(
-                                  msg: 'LOGIN SUCCESS!!!!',
-                                  gravity: ToastGravity.CENTER,
-                                );
-                                userToken = response.token;
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => HomeTabs()));
-                              }
-                            });
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text('Please check correctness !.'),
-                            ));
-                          }
+                        keyboardType: TextInputType.emailAddress,
+                        onSaved: (String? username) {
+                          user.username = username;
                         },
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(80.0)),
-                        padding: const EdgeInsets.all(0.0),
-                        child: Ink(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: <Color>[
-                                Color(0xFF0D47A1),
-                                Color(0xFF66BB6A),
+                      ),
+                      SizedBox(
+                        height: 30.0,
+                      ),
+                      TextFormField(
+                        keyboardType: TextInputType.emailAddress,
+                        cursorColor: Colors.black,
+                        validator: RequiredValidator(
+                            errorText: 'Enter your password please!'),
+                        obscureText: _hiddenPassword,
+                        decoration: InputDecoration(
+                          suffixIcon: InkWell(
+                            onTap: _togglePasswordView,
+                            child: Icon(_hiddenPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility),
+                          ),
+                          border: UnderlineInputBorder(),
+                          labelText: "PASSWORD",
+                          hintText: "12345678",
+                        ),
+                        onSaved: (String? password) {
+                          user.password = password;
+                        },
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                //-----------------------REMEMBERME---------------------------------------
+                                IconButton(
+                                  icon: Icon(_chkTextBox
+                                      ? Icons.check_box
+                                      : Icons.check_box_outline_blank),
+                                  onPressed: () {
+                                    _setStateChkBox();
+                                  },
+                                ),
+                                Text(
+                                  "Remember Me.",
+                                  style: TextStyle(fontSize: 12),
+                                )
                               ],
                             ),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(80.0)),
-                          ),
-                          child: Container(
-                            constraints: const BoxConstraints(
-                                minWidth: double.infinity,
-                                minHeight:
-                                    60.0), // min sizes for Material buttons
-                            alignment: Alignment.center,
-                            child: const Text(
-                              'LOGIN',
-                              textAlign: TextAlign.center,
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 24),
+                            //-----------------------FORGOT PASSWORD---------------------------------------
+                            InkWell(
+                                child: new Text(
+                                  'Forgot Password',
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                onTap: () {
+                                  print("FORGOT PASSWORD");
+                                }),
+                          ],
+                        ),
+                      ),
+                      //-----------------------BUTTON LOGIN---------------------------------------
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        child: RaisedButton(
+                          onPressed: () {
+                            if (_formkey.currentState!.validate()) {
+                              _formkey.currentState!.save();
+                              setState(() {
+                                this.isCallInProgress = true;
+                              });
+                              CallApi()
+                                  .loginCustomer(user.username, user.password)
+                                  .then((response) async {
+                                setState(() {
+                                  // dprint("RESPONSE");
+                                  // print(response!.id);
+                                  userId = response!.id.toString();
+                                  userToken = response.token;
+                                  this.isCallInProgress = false;
+                                });
+                                print(response?.token);
+                                if (response!.token != '') {
+                                  Fluttertoast.showToast(
+                                    msg: 'LOGIN SUCCESS!!!!',
+                                    gravity: ToastGravity.CENTER,
+                                  );
+                                  userToken = response.token;
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => HomeTabs()));
+                                }
+                              });
+                            } else {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: Text('Please check correctness !.'),
+                              ));
+                            }
+                          },
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(80.0)),
+                          padding: const EdgeInsets.all(0.0),
+                          child: Ink(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: <Color>[
+                                  Color(0xFF0D47A1),
+                                  Color(0xFF66BB6A),
+                                ],
+                              ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(80.0)),
+                            ),
+                            child: Container(
+                              constraints: const BoxConstraints(
+                                  minWidth: double.infinity,
+                                  minHeight:
+                                      60.0), // min sizes for Material buttons
+                              alignment: Alignment.center,
+                              child: const Text(
+                                'LOGIN',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 24),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text('No Account '),
-                          InkWell(
-                              child: new Text(
-                                'Register',
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    decoration: TextDecoration.underline,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            RegisterScreen()));
-                              }),
-                        ],
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text('No Account '),
+                            InkWell(
+                                child: new Text(
+                                  'Register',
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              RegisterScreen()));
+                                }),
+                          ],
+                        ),
                       ),
-                    ),
-                    // Container(
-                    //   height: 50.0,
-                    //   child: Row(
-                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    //     children: [
-                    //       SizedBox(
-                    //         width: 150.0,
-                    //         height: 50.0,
-                    //         child: ElevatedButton(
-                    //           child: Text(
-                    //             'LOGIN',
-                    //             style: TextStyle(
-                    //                 fontSize: 18.0,
-                    //                 fontWeight: FontWeight.bold),
-                    //           ),
-                    //           onPressed: () async {
-                    //             if (_formkey.currentState!.validate()) {
-                    //               _formkey.currentState!.save();
-                    //               setState(() {
-                    //                 this.isCallInProgress = true;
-                    //               });
-                    //               CallApi()
-                    //                   .loginCustomer(
-                    //                       user.username, user.password)
-                    //                   .then((response) async {
-                    //                 setState(() {
-                    //                   this.isCallInProgress = false;
-                    //                 });
-                    //                 print(response?.token);
-                    //                 if (response!.token != '') {
-                    //                   Fluttertoast.showToast(
-                    //                     msg: 'LOGIN SUCCESS!!!!',
-                    //                     gravity: ToastGravity.CENTER,
-                    //                   );
-                    //                   userToken = response.token;
-                    //                   Navigator.pushReplacement(
-                    //                       context,
-                    //                       MaterialPageRoute(
-                    //                           builder: (context) =>
-                    //                               HomeTabs()));
-                    //                 }
-                    //               });
-                    //             } else {
-                    //               ScaffoldMessenger.of(context)
-                    //                   .showSnackBar(SnackBar(
-                    //                 content:
-                    //                     Text('Please check correctness !.'),
-                    //               ));
-                    //             }
-                    //           },
-                    //         ),
-                    //       )
-                    //     ],
-                    //   ),
-                    // ),
-                  ],
-                )),
-            SizedBox(
-              height: 20.0,
-            ),
-            SizedBox(
+                      // Container(
+                      //   height: 50.0,
+                      //   child: Row(
+                      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //     children: [
+                      //       SizedBox(
+                      //         width: 150.0,
+                      //         height: 50.0,
+                      //         child: ElevatedButton(
+                      //           child: Text(
+                      //             'LOGIN',
+                      //             style: TextStyle(
+                      //                 fontSize: 18.0,
+                      //                 fontWeight: FontWeight.bold),
+                      //           ),
+                      //           onPressed: () async {
+                      //             if (_formkey.currentState!.validate()) {
+                      //               _formkey.currentState!.save();
+                      //               setState(() {
+                      //                 this.isCallInProgress = true;
+                      //               });
+                      //               CallApi()
+                      //                   .loginCustomer(
+                      //                       user.username, user.password)
+                      //                   .then((response) async {
+                      //                 setState(() {
+                      //                   this.isCallInProgress = false;
+                      //                 });
+                      //                 print(response?.token);
+                      //                 if (response!.token != '') {
+                      //                   Fluttertoast.showToast(
+                      //                     msg: 'LOGIN SUCCESS!!!!',
+                      //                     gravity: ToastGravity.CENTER,
+                      //                   );
+                      //                   userToken = response.token;
+                      //                   Navigator.pushReplacement(
+                      //                       context,
+                      //                       MaterialPageRoute(
+                      //                           builder: (context) =>
+                      //                               HomeTabs()));
+                      //                 }
+                      //               });
+                      //             } else {
+                      //               ScaffoldMessenger.of(context)
+                      //                   .showSnackBar(SnackBar(
+                      //                 content:
+                      //                     Text('Please check correctness !.'),
+                      //               ));
+                      //             }
+                      //           },
+                      //         ),
+                      //       )
+                      //     ],
+                      //   ),
+                      // ),
+                    ],
+                  )),
+              SizedBox(
                 height: 20.0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                        child: Container(
-                      child: Divider(
-                        color: Colors.black,
-                        height: 36,
-                      ),
-                    )),
-                    Text(' OR SIGN IN WITH '),
-                    Expanded(
-                        child: Container(
-                      child: Divider(
-                        color: Colors.black,
-                        height: 36,
-                      ),
-                    )),
-                  ],
-                )),
-            SizedBox(
-              height: 30.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    print('Login With Facebook');
-                    _googleSignIn.disconnect();
-                    //print('${_currentUser}');
-                  },
-                  child: Container(
-                      height: 60.0,
-                      width: 60.0,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 2),
-                            blurRadius: 6.0,
-                          )
-                        ],
-                        image: DecorationImage(
-                          image: NetworkImage(
-                              "https://facebookbrand.com/wp-content/uploads/2019/04/f_logo_RGB-Hex-Blue_512.png?w=512&h=512"),
+              ),
+              SizedBox(
+                  height: 20.0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                          child: Container(
+                        child: Divider(
+                          color: Colors.black,
+                          height: 36,
                         ),
                       )),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    _handleSignIn();
-                    print('Login With Google');
-                    //print('${_currentUser}');
-                    //push
-                  },
-                  child: Container(
-                      height: 60.0,
-                      width: 60.0,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 2),
-                            blurRadius: 6.0,
-                          )
-                        ],
-                        image: DecorationImage(
-                          image: NetworkImage(
-                              "https://www.pikpng.com/pngl/b/44-442110_jpg-black-and-white-library-google-logo-png.png"),
+                      Text(' OR SIGN IN WITH '),
+                      Expanded(
+                          child: Container(
+                        child: Divider(
+                          color: Colors.black,
+                          height: 36,
                         ),
                       )),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-          ],
+                    ],
+                  )),
+              SizedBox(
+                height: 30.0,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      print('Login With Facebook');
+                      _googleSignIn.disconnect();
+                      //print('${_currentUser}');
+                    },
+                    child: Container(
+                        height: 60.0,
+                        width: 60.0,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              offset: Offset(0, 2),
+                              blurRadius: 6.0,
+                            )
+                          ],
+                          image: DecorationImage(
+                            image: NetworkImage(
+                                "https://facebookbrand.com/wp-content/uploads/2019/04/f_logo_RGB-Hex-Blue_512.png?w=512&h=512"),
+                          ),
+                        )),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      _handleSignIn();
+                      print('Login With Google');
+                      //print('${_currentUser}');
+                      //push
+                    },
+                    child: Container(
+                        height: 60.0,
+                        width: 60.0,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              offset: Offset(0, 2),
+                              blurRadius: 6.0,
+                            )
+                          ],
+                          image: DecorationImage(
+                            image: NetworkImage(
+                                "https://www.pikpng.com/pngl/b/44-442110_jpg-black-and-white-library-google-logo-png.png"),
+                          ),
+                        )),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     ));

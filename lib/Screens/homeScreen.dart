@@ -50,42 +50,44 @@ class _HomeScreenState extends State<HomeScreen> {
     //   },
     // );
     return Scaffold(
-      body: Container(
-          decoration: BoxDecoration(
-            gradient:
-                LinearGradient(colors: [Color(0xFF009688), Color(0xFF3d85c6)]),
-          ),
-          padding: EdgeInsets.only(top: 20, left: 10, right: 10),
-          height: _height,
-          width: _width,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _showProfile(),
-                SizedBox(
-                  height: 10,
-                ),
-                _menu(),
-                SizedBox(
-                  height: 10,
-                ),
-                _headHistory(),
-                Column(
-                  children: authRsp!.recentDurians.map(
-                    (rd) {
-                      return _showHistory(rd);
-                    },
-                  ).toList(),
-                ),
-                _tailHistory(),
-                SizedBox(
-                  height: 10,
-                ),
-              ],
+      body: SafeArea(
+        child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  colors: [Color(0xFF009688), Color(0xFF3d85c6)]),
             ),
-          )),
+            padding: EdgeInsets.only(top: 20, left: 10, right: 10),
+            height: _height,
+            width: _width,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _showProfile(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  _menu(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  _headHistory(),
+                  Column(
+                    children: authRsp!.recentDurians.map(
+                      (rd) {
+                        return _showHistory(rd);
+                      },
+                    ).toList(),
+                  ),
+                  _tailHistory(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                ],
+              ),
+            )),
+      ),
     );
   }
 
