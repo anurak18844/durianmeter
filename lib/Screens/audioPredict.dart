@@ -7,7 +7,6 @@ import 'package:durianmeter/Network/restApi.dart';
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_audio_recorder2/flutter_audio_recorder2.dart';
@@ -60,8 +59,6 @@ class RecorderExampleState extends State<RecorderExample>
   Animation<double>? animation;
   double maturityValue = 0;
   double valueStart = 100;
-
-  final Future<FirebaseApp> firebase = Firebase.initializeApp();
 
   @override
   void initState() {
@@ -598,9 +595,9 @@ class RecorderExampleState extends State<RecorderExample>
           maturityValue = resp.maturityScore!.toDouble();
           animation = Tween<double>(begin: 0, end: maturityValue)
               .animate(progressController!)
-            ..addListener(() {
-              setState(() {});
-            });
+                ..addListener(() {
+                  setState(() {});
+                });
           progressController!.forward();
         });
       }

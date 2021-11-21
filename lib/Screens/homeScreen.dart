@@ -113,6 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: 100,
                 child: Row(
                   children: [
+                    // Text('${NumberFormat("#,##0").format(authRsp!.quota)}'),
                     Text('${authRsp!.quota}'),
                     Image(
                       image: AssetImage('assets/logoicon.png'),
@@ -182,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
           size: 35,
         ),
         title: Text(
-          '${authRsp!.username}',
+          '${authRsp!.firstname} ${authRsp!.lastname}',
           style: TextStyle(fontSize: 20),
         ),
         subtitle: Text(
