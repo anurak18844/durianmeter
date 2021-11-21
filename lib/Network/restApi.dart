@@ -56,7 +56,7 @@ class CallApi {
     );
     request.fields["user"] = "1";
     request.fields["location_lat"] = "3.555877";
-    request.fields["location_long"] = "6.475788";
+    request.fields["location_lng"] = "6.475788";
     print(request.files[0].filename);
 
     request.fields.forEach((key, value) => print("k: $key, v: $value"));
